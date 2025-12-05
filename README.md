@@ -1,5 +1,8 @@
 # Vitalia Frontend – EMR & Appointment Management UI
 
+**View the backend code here →** [Backend](https://github.com/RuiQiHuang1832/vitalia-backend)
+
+
 Vitalia Frontend is a clean, modern **Next.js** application that provides the user interface for the Vitalia health management platform.  
 It offers role-based views for **patients**, **providers**, and **admins**, and connects directly to the Vitalia Backend EMR & Appointment System API.
 
