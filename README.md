@@ -2,7 +2,6 @@
 
 **View the backend code here →** [Backend](https://github.com/RuiQiHuang1832/vitalia-backend)
 
-
 Vitalia Frontend is a clean, modern **Next.js** application that provides the user interface for the Vitalia health management platform.
 It offers role-based views for **patients**, **providers**, and **admins**, and connects directly to the Vitalia Backend EMR & Appointment System API.
 
@@ -12,12 +11,12 @@ The goal is a simple, professional, and functional UI, not flashy, designed to c
 
 Vitalia includes three role-based interfaces, each tailored to realistic clinical workflows.
 
-
-##  Patient Portal
+## Patient Portal
 
 A streamlined view for patients to manage their information and access their medical records.
 
 ### **Features**
+
 - **Login / Authentication**
 - **View Profile Information**
 - **Update Profile Details**
@@ -30,13 +29,12 @@ A streamlined view for patients to manage their information and access their med
 
 Designed to mimic typical patient-facing portals in modern health systems.
 
-
-
-##  Provider Dashboard
+## Provider Dashboard
 
 A professional interface for clinicians to manage patients, document visits, and coordinate care.
 
 ### **Features**
+
 - **Provider Login**
 - **Patient List** (sortable & searchable)
 - **Patient Detail Page**
@@ -51,13 +49,12 @@ A professional interface for clinicians to manage patients, document visits, and
 
 This view demonstrates core EMR workflows from the clinician’s perspective.
 
-
-
-##  Admin Console
+## Admin Console
 
 Lightweight admin tools for managing the platform.
 
 ### **Features**
+
 - **Admin Login**
 - **Create Providers**
 - **Manage All Users**
@@ -65,9 +62,7 @@ Lightweight admin tools for managing the platform.
 
 This role showcases role-based UI gating and administrative flows.
 
-
-
-##  Tech Stack
+## Tech Stack
 
 - **Next.js (App Router)**
 - **React**
@@ -75,11 +70,12 @@ This role showcases role-based UI gating and administrative flows.
 - **Tailwind CSS**
 - **shadcn/ui**
 
-##  Backend Integration
+## Backend Integration
 
 This frontend communicates directly with the Vitalia Backend:
 
 ### Uses:
+
 - `POST /auth/login`
 - `GET /patients/:id`
 - `GET /providers/:id`
@@ -88,47 +84,27 @@ This frontend communicates directly with the Vitalia Backend:
 
 The UI is intentionally minimal.
 
-##  Pages
+## Test Accounts
 
-### **/login**
-Universal login screen → redirects based on user role.
+To quickly test the app without creating users, you can log in with the following accounts:
 
-### **/patient/**
-- `/patient/dashboard`
-- `/patient/profile`
-- `/patient/appointments`
-- `/patient/emr`
-  - notes
-  - vitals
-  - meds
-  - allergies
-
-### **/provider/**
-- `/provider/dashboard`
-- `/provider/patients`
-- `/provider/patients/[id]`
-- `/provider/appointments`
-- `/provider/notes/create`
-
-### **/admin/**
-- `/admin/dashboard`
-- `/admin/providers`
-- `/admin/users`
+- **Admin**: `admin@gmail.com` / `admin123`
+- **Patient**: `patient@gmail.com` / `admin123`
 
 
-##  Status
+## Status
 
 Actively under development.
 Pages will be built gradually as backend endpoints are completed.
 
 Current focus:
+
 - Authentication flow
 - Role-based routing
 - Patient dashboard
 - Provider patient list
 
-
-##  Goal
+## Goal
 
 Deliver a **clean, functional, realistic** frontend that demonstrates:
 
