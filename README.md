@@ -89,8 +89,8 @@ The UI is intentionally minimal.
 To quickly test the app without creating users, you can log in with the following accounts:
 
 - **Admin**: `admin@gmail.com` / `admin123`
+- **Provider**: `provider@gmail.com` / `admin123`
 - **Patient**: `patient@gmail.com` / `admin123`
-
 
 ## Status
 
