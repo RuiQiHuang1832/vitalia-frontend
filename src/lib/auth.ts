@@ -9,8 +9,18 @@ export async function hydrateAuth() {
       throw new Error(res.statusText)
     }
     const user = await res.json()
+    console.log(user)
     useAuthStore.getState().setUser(user)
   } catch {
     useAuthStore.getState().clearUser()
   }
+}
+
+export async function logout() {
+  await fetch(apiUrl('/auth/logout'), {
+    method: 'POST',
+    credentials: 'include',
+  })
+
+  useAuthStore.getState().clearUser()
 }

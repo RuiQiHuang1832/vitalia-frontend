@@ -14,8 +14,9 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
 
-export function NavMain({
+export function NavGroup({
   items,
+  groupName,
 }: {
   items: {
     title: string
@@ -26,11 +27,12 @@ export function NavMain({
       title: string
       url: string
     }[]
-  }[]
+  }[],
+  groupName: string
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Clinical</SidebarGroupLabel>
+      <SidebarGroupLabel>{groupName}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible

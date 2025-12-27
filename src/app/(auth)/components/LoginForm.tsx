@@ -51,7 +51,6 @@ export default function LoginForm() {
       if (res.ok) {
         const payload = await res.json()
         const user = payload.user
-
         useAuthStore.getState().setUser(user)
 
         const role = user?.role

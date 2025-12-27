@@ -4,7 +4,9 @@ export type Role = 'ADMIN' | 'PROVIDER' | 'PATIENT'
 
 export interface User {
   id: number
+  email: string
   role: Role
+  displayName: string
 }
 
 type Status = 'loading' | 'authenticated' | 'unauthenticated'

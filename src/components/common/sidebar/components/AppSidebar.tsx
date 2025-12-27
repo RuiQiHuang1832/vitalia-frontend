@@ -1,11 +1,13 @@
 'use client'
 
-import { Calendar, ClipboardList, Clock, FileText, Users } from 'lucide-react'
+import { Calendar, ClipboardList, Clock, HeartPulse, Users } from 'lucide-react'
 import * as React from 'react'
 
+import { useAuthStore } from '@/app/(auth)/stores/auth.store'
+import { NavDashboard } from '@/components/common/sidebar/components/NavDashboard'
+import { NavGroup } from '@/components/common/sidebar/components/NavGroup'
 import { NavHeader } from '@/components/common/sidebar/components/NavHeader'
-import { NavMain } from '@/components/common/sidebar/components/NavMain'
-import { NavProjects } from '@/components/common/sidebar/components/NavProjects'
+import { NavList } from '@/components/common/sidebar/components/NavList'
 import { NavUser } from '@/components/common/sidebar/components/NavUser'
 import {
   Sidebar,
@@ -15,13 +17,8 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 
-const data = {
-  user: {
-    name: 'Admin ',
-    email: 'admin@gmail.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
-  navMain: [
+const providerNavigation = {
+  navGroup: [
     {
       title: 'Patients',
       url: '#',
@@ -53,17 +50,32 @@ const data = {
         },
       ],
     },
+  ],
+  navList: [
     {
-      title: 'EMR',
+      name: 'Audit Logs',
       url: '#',
-      icon: FileText,
+      icon: ClipboardList,
+    },
+    {
+      name: 'Availability',
+      url: '#',
+      icon: Clock,
+    },
+  ],
+  variant: 'Provider',
+  groupName: 'Clinical',
+  listName: 'Administration',
+}
+const patientNavigation = {
+  navGroup: [
+    {
+      title: 'Health Records',
+      url: '#',
+      icon: HeartPulse,
       items: [
         {
           title: 'Visit Notes',
-          url: '#',
-        },
-        {
-          title: 'Problems',
           url: '#',
         },
         {
@@ -81,32 +93,46 @@ const data = {
       ],
     },
   ],
-  projects: [
+  navList: [
     {
-      name: 'Audit Logs',
+      name: 'Appointments',
       url: '#',
-      icon: ClipboardList,
-    },
-    {
-      name: 'Availability',
-      url: '#',
-      icon: Clock,
+      icon: Calendar,
     },
   ],
+  variant: 'Patient',
+  groupName: 'My Health',
+  listName: 'My Account',
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuthStore()
+  const role = user?.role
+  const navigation = role === 'PATIENT' ? patientNavigation : providerNavigation
+
+  const person = {
+    name: user?.displayName || 'User',
+    email: user?.email || 'user@example.com',
+    avatar: '/avatars/shadcn.jpg',
+  }
+  console.log(user)
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <NavHeader></NavHeader>
+        <NavHeader name={navigation.variant}></NavHeader>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <NavDashboard />
+        {navigation.navGroup?.length > 0 && (
+          <NavGroup groupName={navigation.groupName} items={navigation.navGroup} />
+        )}
+        {navigation.navList?.length > 0 && (
+          <NavList listName={navigation.listName} items={navigation.navList} />
+        )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={person} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

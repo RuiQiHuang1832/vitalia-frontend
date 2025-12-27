@@ -3,7 +3,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui
 
 import { LuActivity } from 'react-icons/lu'
 
-export function NavHeader() {
+export function NavHeader({ name }: { name: string }) {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -18,7 +18,7 @@ export function NavHeader() {
               </div>
               <div className="leading-tight">
                 <div className="text-sm font-semibold">Vitalia</div>
-                <div className="text-xs text-muted-foreground">Dashboard</div>
+                <div className="text-xs text-muted-foreground">{name} Portal</div>
               </div>
             </SidebarMenuButton>
           </DropdownMenuTrigger>
