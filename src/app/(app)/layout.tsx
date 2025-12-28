@@ -12,9 +12,9 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
   return (
     <AuthGuard>
-      <Sidebar/>
-      <div className="min-h-dvh grid grid-rows-[auto_1fr_auto] max-w-[1600px] mx-auto px-4 ">
-        <main>{children}</main>
+      <div className=" max-w-[1600px] mx-auto px-4 ">
+        <Sidebar />
+        <div>{children}</div>
       </div>
     </AuthGuard>
   )

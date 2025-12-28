@@ -110,13 +110,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const role = user?.role
   const navigation = role === 'PATIENT' ? patientNavigation : providerNavigation
 
-  const person = {
-    name: user?.displayName || 'User',
-    email: user?.email || 'user@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  }
-  console.log(user)
-
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -132,7 +125,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={person} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
