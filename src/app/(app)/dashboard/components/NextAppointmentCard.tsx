@@ -63,7 +63,7 @@ export default function NextAppointmentCard() {
     endTime: '2025-05-12 23:00:00',
   }
   const { data: payload } = useProviderAppointments()
-  console.log(payload.data)
+  console.log(payload?.data)
   const { label } = getAppointmentStatus(appointment.startTime)
   const timeText = formatTimeRange(appointment.startTime, appointment.endTime)
 
