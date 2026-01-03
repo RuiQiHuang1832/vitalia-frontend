@@ -6,31 +6,42 @@ export interface User {
   id: number
   email: string
   role: Role
-  displayName: string
 }
 
 type Status = 'loading' | 'authenticated' | 'unauthenticated'
 
+type SessionPayload = {
+  user: User
+  providerId?: number
+  patientId?: number
+}
+
 interface AuthState {
   user: User | null
   status: Status
-  setUser: (user: User) => void
+  providerId?: number
+  patientId?: number
+  setSession: (payload: SessionPayload) => void
   clearUser: () => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   status: 'loading',
-  // login
-  setUser: (user: User) =>
+  providerId: undefined,
+  patientId: undefined,
+  setSession: (payload: SessionPayload) =>
     set({
-      user,
+      user: payload.user,
       status: 'authenticated',
+      providerId: payload.providerId,
+      patientId: payload.patientId,
     }),
-  // logout
   clearUser: () =>
     set({
       user: null,
       status: 'unauthenticated',
+      providerId: undefined,
+      patientId: undefined,
     }),
 }))

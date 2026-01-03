@@ -12,9 +12,8 @@ export default function AppLayout({ children }: Readonly<{ children: React.React
 
   return (
     <AuthGuard>
-      <div className=" max-w-[1600px] mx-auto px-4 ">
-        <Sidebar />
-        <div>{children}</div>
+      <div className="min-h-screen">
+        <Sidebar>{children}</Sidebar>
       </div>
     </AuthGuard>
   )

@@ -1,6 +1,5 @@
 'use client'
 
-import { type Role } from '@/app/(auth)/stores/auth.store'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -19,11 +18,12 @@ import {
 } from '@/components/ui/sidebar'
 import { useCurrentUserDisplay } from '@/hooks/useCurrentUserDisplay'
 import { logout } from '@/lib/auth'
-import { capitalize } from '@/lib/helper'
+import { capitalize } from '@/lib/utils'
 import { BadgeCheck, Bell, ChevronsUpDown, LogOut, Wrench } from 'lucide-react'
 export function NavUser() {
   const { isMobile } = useSidebar()
-  const { greeting, fullName, displayName, avatar, email } = useCurrentUserDisplay()
+  const { greeting, fullName, displayName, avatar, email, specialty, isLoading } =
+    useCurrentUserDisplay()
 
   return (
     <SidebarMenu>
@@ -34,15 +34,28 @@ export function NavUser() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={avatar} alt={fullName} />
-                <AvatarFallback className="rounded-lg">
-                  {capitalize(fullName.charAt(0))}
-                </AvatarFallback>
-              </Avatar>
+              {isLoading ? (
+                <Avatar className="h-8 w-8 rounded-lg bg-gray-200 dark:bg-gray-700">
+                  <AvatarFallback className="rounded-lg animate-pulse" />
+                </Avatar>
+              ) : (
+                <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarImage src={avatar} alt={fullName} />
+                  <AvatarFallback className="rounded-lg">
+                    {capitalize(fullName.charAt(0))}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{displayName}</span>
-                <span className="truncate text-xs">{email}</span>
+                {isLoading ? (
+                  <span className="h-4 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></span>
+                ) : (
+                  <>
+                    <span className="truncate font-medium">{displayName}</span>
+                    <span className="truncate text-xs">{specialty}</span>
+                  </>
+                )}
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>

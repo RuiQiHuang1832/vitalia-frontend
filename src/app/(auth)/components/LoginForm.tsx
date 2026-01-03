@@ -49,15 +49,19 @@ export default function LoginForm() {
         body: JSON.stringify(data),
       })
       if (res.ok) {
-        const payload = await res.json()
-        const user = payload.user
-        useAuthStore.getState().setUser(user)
-
-        const role = user?.role
-        if (role === 'PATIENT') {
-          router.replace('/patient')
-        } else if (role === 'ADMIN' || role === 'PROVIDER') {
-          router.replace('/dashboard')
+        const data = await res.json()
+        const payload = data.user
+        const role = payload?.role
+        switch (role) {
+          case 'PATIENT':
+            router.replace('/patient')
+            break
+          case 'PROVIDER':
+            router.replace('/dashboard')
+            break
+          case 'ADMIN':
+            router.replace('/admin')
+            break
         }
       } else {
         console.error('Login failed:', res.statusText, res.status)

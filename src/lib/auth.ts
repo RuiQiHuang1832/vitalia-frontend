@@ -8,8 +8,17 @@ export async function hydrateAuth() {
     if (!res.ok) {
       throw new Error(res.statusText)
     }
-    const user = await res.json()
-    useAuthStore.getState().setUser(user)
+    const data = await res.json()
+    const payload = {
+      user: {
+        id: data.id,
+        email: data.email,
+        role: data.role,
+      },
+      providerId: data.providerId ?? null,
+      patientId: data.patientId ?? null,
+    }
+    useAuthStore.getState().setSession(payload)
   } catch {
     useAuthStore.getState().clearUser()
   }

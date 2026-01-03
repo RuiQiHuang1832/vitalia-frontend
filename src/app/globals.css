@@ -147,9 +147,7 @@ html {
   h6 {
     @apply text-base font-medium;
   }
-  p {
-    @apply leading-7;
-  }
+
   small {
     @apply text-sm leading-none font-medium;
   }

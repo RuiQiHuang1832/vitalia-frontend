@@ -1,19 +1,13 @@
 import { useAuthStore } from '@/app/(auth)/stores/auth.store'
 import { useUserProfile } from '@/hooks/useUserProfile'
-import { capitalize } from '@/lib/helper'
-
-type BasicProfile = {
-  firstName?: string | null
-  lastName?: string | null
-  email?: string | null
-  avatar?: string | null
-}
+import { capitalize } from '@/lib/utils'
 
 const ADMIN_PROFILE = {
   firstName: 'Admin',
   lastName: 'Admin',
   email: 'admin@gmail.com',
   avatar: '/avatars/shadcn.jpg',
+  specialty: 'Administrator',
 }
 
 export function useCurrentUserDisplay() {
@@ -23,14 +17,14 @@ export function useCurrentUserDisplay() {
   const isAdmin = role === 'ADMIN'
   const isProvider = role === 'PROVIDER'
 
-  const { data: profile } = useUserProfile(!isAdmin)
+  const { data: profile, isLoading } = useUserProfile(!isAdmin)
 
   const finalProfile = isAdmin ? ADMIN_PROFILE : profile
 
   const firstName = capitalize(finalProfile?.firstName ?? '')
   const lastName = capitalize(finalProfile?.lastName ?? '')
   const fullName = `${firstName} ${lastName}`.trim()
-
+  const specialty = capitalize(finalProfile?.specialty ?? 'Patient')
   const displayName = isProvider ? `Dr. ${fullName}`.trim() : fullName
   const greeting = isProvider ? `Dr. ${lastName}` : firstName
 
@@ -46,5 +40,7 @@ export function useCurrentUserDisplay() {
     greeting,
     email,
     avatar,
+    isLoading,
+    specialty,
   }
 }

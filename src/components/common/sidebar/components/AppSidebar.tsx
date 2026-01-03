@@ -1,6 +1,15 @@
 'use client'
 
-import { Calendar, ClipboardList, Clock, HeartPulse, Users } from 'lucide-react'
+import {
+  BarChart3,
+  Calendar,
+  ClipboardList,
+  Clock,
+  HeartPulse,
+  Settings,
+  ShieldCheck,
+  Users,
+} from 'lucide-react'
 import * as React from 'react'
 
 import { useAuthStore } from '@/app/(auth)/stores/auth.store'
@@ -104,11 +113,75 @@ const patientNavigation = {
   groupName: 'My Health',
   listName: 'My Account',
 }
+const adminNavigation = {
+  navGroup: [
+    {
+      title: 'User Management',
+      url: '#',
+      icon: Users,
+      isActive: true,
+      items: [
+        {
+          title: 'All Users',
+          url: '/admin/users',
+        },
+        {
+          title: 'Providers',
+          url: '/admin/providers',
+        },
+        {
+          title: 'Patients',
+          url: '/admin/patients',
+        },
+      ],
+    },
+    {
+      title: 'System Oversight',
+      url: '#',
+      icon: ShieldCheck,
+      items: [
+        {
+          title: 'Audit Logs',
+          url: '/admin/audit-logs',
+        },
+        {
+          title: 'Login Activity',
+          url: '/admin/sessions',
+        },
+      ],
+    },
+  ],
+
+  navList: [
+    {
+      name: 'Appointments',
+      url: '/admin/appointments',
+      icon: Calendar,
+    },
+    {
+      name: 'System Metrics',
+      url: '/admin/metrics',
+      icon: BarChart3,
+    },
+    {
+      name: 'Settings',
+      url: '/admin/settings',
+      icon: Settings,
+    },
+  ],
+
+  variant: 'Admin',
+  groupName: 'Administration',
+  listName: 'System',
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuthStore()
+  
   const role = user?.role
-  const navigation = role === 'PATIENT' ? patientNavigation : providerNavigation
+
+  const navigation =
+    role === 'PATIENT' ? patientNavigation : role === 'ADMIN' ? adminNavigation : providerNavigation
 
   return (
     <Sidebar collapsible="icon" {...props}>

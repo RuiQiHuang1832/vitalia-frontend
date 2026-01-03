@@ -10,7 +10,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 
-export default function Sidebar() {
+export default function Sidebar({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -32,6 +32,7 @@ export default function Sidebar() {
             </Breadcrumb>
           </div>
         </header>
+        <div className="flex-1 px-6 py-2">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )
