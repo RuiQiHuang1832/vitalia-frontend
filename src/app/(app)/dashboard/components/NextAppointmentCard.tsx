@@ -10,8 +10,9 @@ import {
 } from '@/components/ui/card'
 import { Stack } from '@/components/ui/stack'
 import { useProviderAppointments } from '@/hooks/useProviderAppointments'
-import { cn } from '@/lib/utils'
+import { calculateAge, capitalize, cn } from '@/lib/utils'
 import { Calendar, MapPin, User } from 'lucide-react'
+import { generateUiMrn } from '../lib/helper'
 
 function formatTimeRange(startTime: string, endTime?: string) {
   const start = new Date(startTime.replace(' ', 'T'))
@@ -62,11 +63,22 @@ export default function NextAppointmentCard() {
     startTime: '2025-05-12 22:00:00',
     endTime: '2025-05-12 23:00:00',
   }
-  const { data: payload } = useProviderAppointments()
-  console.log(payload?.data)
+  const { data: payload, isLoading, error } = useProviderAppointments()
   const { label } = getAppointmentStatus(appointment.startTime)
   const timeText = formatTimeRange(appointment.startTime, appointment.endTime)
-
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+  if (error || !payload) {
+    return <div>Error loading appointment data.</div>
+  }
+  const patientInfo = payload.data[0].patient
+  console.log(payload.data[0])
+  const appointmentInfo = payload.data[0]
+  const { reason, startTime, endTime, status } = appointmentInfo
+  const { firstName, lastName, dob, gender } = patientInfo
+  const age = calculateAge(dob)
+  const MRN = generateUiMrn(patientInfo.id)
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
@@ -99,20 +111,25 @@ export default function NextAppointmentCard() {
         <div className="flex items-start gap-4">
           {/* Avatar / Initials */}
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted font-medium">
-            S.L.
+            {firstName.charAt(0)}
+            {lastName.charAt(0)}
           </div>
 
           <div className="flex-1">
             <Stack justify="between">
               <div>
-                <p className="font-semibold">Stephanie Lee</p>
+                <p className="font-semibold">
+                  {firstName} {lastName}
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">MRN #00000</p>
+              <p className="text-xs text-muted-foreground">{MRN}</p>
             </Stack>
             <div className=" space-y-1">
               <Stack gap={2} className="text-sm text-muted-foreground">
                 <User className="h-4 w-4" />
-                <span>36 y/o • Female</span>
+                <span>
+                  {age} y/o • {capitalize(gender)}
+                </span>
               </Stack>
               <Stack gap={2} className="text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
@@ -127,18 +144,22 @@ export default function NextAppointmentCard() {
         </div>
 
         {/* Primary Concern */}
-        <div className="rounded-lg border bg-muted/40 p-3">
-          <p className="text-sm font-medium text-muted-foreground">Primary Concern</p>
-          <p className="font-medium">Diabetes (Type 2) — Follow-up</p>
+        <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Primary Concern</p>
+            <p className="font-medium">{reason}</p>
+          </div>
 
-          <div className="mt-2 flex flex-wrap gap-4 text-sm">
-            <span>
-              A1C: <span className="font-medium text-red-600">8.4% ↑</span>
+          <div className="flex flex-wrap items-center gap-6 text-sm">
+            <span className="text-slate-500">
+              HR
+              <span className="ml-1 font-semibold text-slate-900">72 bpm</span>
             </span>
-            <span>
-              BP: <span className="font-medium text-amber-600">142 / 92</span>
+
+            <span className="text-slate-500">
+              BP
+              <span className="ml-1 font-semibold text-slate-900">118 / 76</span>
             </span>
-            <span className="text-muted-foreground">Last Visit: 3 months ago</span>
           </div>
         </div>
       </CardContent>

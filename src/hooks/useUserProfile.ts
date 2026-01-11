@@ -4,7 +4,6 @@ import useSWR from 'swr'
 
 export function useUserProfile(enabled = true) {
   const user = useAuthStore((s) => s.user)
-  console.log(user)
   const key = !user
     ? null
     : user.role === 'PROVIDER'
@@ -14,7 +13,7 @@ export function useUserProfile(enabled = true) {
     : null
 
   return useSWR(
-    enabled ? key : null, // null = no fetch
+    enabled ? key : null, // null = no fetch, used for admin
     swrFetcher
   )
 }

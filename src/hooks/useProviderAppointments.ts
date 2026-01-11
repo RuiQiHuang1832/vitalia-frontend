@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/app/(auth)/stores/auth.store'
-import useSWR from 'swr'
 import { swrFetcher } from '@/lib/fetcher'
+import useSWR from 'swr'
 
 export function useProviderAppointments(enabled = true) {
   const providerId = useAuthStore((s) => s.providerId)
@@ -9,4 +9,3 @@ export function useProviderAppointments(enabled = true) {
 
   return useSWR(key, swrFetcher)
 }
-// need to edit this

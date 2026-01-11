@@ -177,7 +177,7 @@ const adminNavigation = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuthStore()
-  
+
   const role = user?.role
 
   const navigation =
