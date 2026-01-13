@@ -1,7 +1,7 @@
 'use client'
-import AppointmentListCard from '@/app/(app)/dashboard/components/AppointmentListCard'
-import NextAppointmentCard from '@/app/(app)/dashboard/components/NextAppointmentCard'
-import TasksCard from '@/app/(app)/dashboard/components/TasksCard'
+import AppointmentListCard from '@/app/(app)/dashboard/components/AppointmentList/AppointmentListCard'
+import NextAppointmentCard from '@/app/(app)/dashboard/components/NextAppointment/NextAppointmentCard'
+import TasksCard from '@/app/(app)/dashboard/components/Tasks/TasksCard'
 import { getTimeGreeting } from '@/app/(app)/dashboard/lib/helper'
 import { useCurrentUserDisplay } from '@/hooks/useCurrentUserDisplay'
 export default function Dashboard() {
@@ -25,7 +25,7 @@ export default function Dashboard() {
           <h2 id="next-appointment-heading" className="sr-only">
             Next Appointment
           </h2>
-          <NextAppointmentCard />
+           <NextAppointmentCard />
         </section>
 
         {/* Left column */}

@@ -1,3 +1,4 @@
+import NextAppointmentSkeleton from '@/app/(app)/dashboard/components/NextAppointment/NextAppointmentSkeleton'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -12,7 +13,7 @@ import { Stack } from '@/components/ui/stack'
 import { useProviderAppointments } from '@/hooks/useProviderAppointments'
 import { calculateAge, capitalize, cn } from '@/lib/utils'
 import { Calendar, MapPin, User } from 'lucide-react'
-import { generateUiMrn } from '../lib/helper'
+import { generateUiMrn } from '../../lib/helper'
 
 function formatTimeRange(startTime: string, endTime?: string) {
   const start = new Date(startTime.replace(' ', 'T'))
@@ -67,7 +68,7 @@ export default function NextAppointmentCard() {
   const { label } = getAppointmentStatus(appointment.startTime)
   const timeText = formatTimeRange(appointment.startTime, appointment.endTime)
   if (isLoading) {
-    return <div>Loading...</div>
+    return <NextAppointmentSkeleton />
   }
   if (error || !payload) {
     return <div>Error loading appointment data.</div>
