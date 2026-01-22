@@ -71,14 +71,14 @@ export default function NextAppointmentCard() {
     return <NextAppointmentSkeleton />
   }
   if (error || !payload?.data?.length || !payload.data[0]?.patient) {
-    return <div>Error loading appointment data.</div>
+    return <div>Error loading appointment data. Try refreshing the page.</div>
   }
   const patientInfo = payload.data[0].patient
-  console.log(payload.data[0])
+  // console.log(payload.data[0])
   const appointmentInfo = payload.data[0]
   const { reason, startTime, endTime, status } = appointmentInfo
   const { firstName, lastName, dob, gender } = patientInfo
-  console.log(patientInfo)
+  // console.log(patientInfo)
   const age = calculateAge(dob)
   const MRN = generateUiMrn(patientInfo.id)
   return (

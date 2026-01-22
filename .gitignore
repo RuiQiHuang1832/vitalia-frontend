@@ -43,3 +43,5 @@ next-env.d.ts
 /.env.local
 /test-results
 /.vscode/tasks.json
+/test_docs
+/test_docs.md

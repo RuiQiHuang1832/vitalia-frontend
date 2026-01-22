@@ -48,23 +48,36 @@ export default function LoginForm() {
         credentials: 'include',
         body: JSON.stringify(data),
       })
-      if (res.ok) {
-        const data = await res.json()
-        const payload = data.user
-        const role = payload?.role
-        switch (role) {
-          case 'PATIENT':
-            router.replace('/patient')
-            break
-          case 'PROVIDER':
-            router.replace('/dashboard')
-            break
-          case 'ADMIN':
-            router.replace('/admin')
-            break
-        }
-      } else {
+      if (!res.ok) {
         console.error('Login failed:', res.statusText, res.status)
+        return
+      }
+
+      const json = await res.json()
+      const payload = {
+        user: {
+          id: json.user.id,
+          email: json.user.email,
+          role: json.user.role,
+        },
+        providerId: json.user.providerId ?? null,
+        patientId: json.user.patientId ?? null,
+      }
+
+      useAuthStore.getState().setSession(payload)
+      // Set flag to skip hydration, fixes COOKIE RACE
+      sessionStorage.setItem('justLoggedIn', 'true')
+      // Redirect by role
+      switch (payload.user.role) {
+        case 'PATIENT':
+          router.replace('/patient')
+          break
+        case 'PROVIDER':
+          router.replace('/dashboard')
+          break
+        case 'ADMIN':
+          router.replace('/admin')
+          break
       }
     } catch (error) {
       console.error('Network error:', error)
@@ -72,10 +85,8 @@ export default function LoginForm() {
   }
 
   useEffect(() => {
-    if (user) {
-      console.log('User state updated:', user)
-      console.log('Current status:', status)
-    }
+    console.log('User state updated:', user)
+    console.log('Current status:', status)
   }, [user, status]) //debugging purpose
 
   return (

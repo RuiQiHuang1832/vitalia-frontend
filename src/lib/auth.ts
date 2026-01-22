@@ -1,6 +1,13 @@
 import { useAuthStore } from '@/app/(auth)/stores/auth.store'
 import { apiUrl } from '@/lib/api'
 export async function hydrateAuth() {
+  const justLoggedIn = sessionStorage.getItem('justLoggedIn')
+
+  if (justLoggedIn) {
+    // Skip hydration once to avoid cookie race
+    sessionStorage.removeItem('justLoggedIn')
+    return
+  }
   try {
     const res = await fetch(apiUrl('/auth/me'), {
       credentials: 'include',
