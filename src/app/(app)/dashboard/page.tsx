@@ -1,5 +1,6 @@
 'use client'
 import AppointmentListCard from '@/app/(app)/dashboard/components/AppointmentList/AppointmentListCard'
+import ClinicalPreviewCard from '@/app/(app)/dashboard/components/ClinicalPreview/ClinicalPreviewCard'
 import NextAppointmentCard from '@/app/(app)/dashboard/components/NextAppointment/NextAppointmentCard'
 import TasksCard from '@/app/(app)/dashboard/components/Tasks/TasksCard'
 import { getTimeGreeting } from '@/app/(app)/dashboard/lib/helper'
@@ -19,25 +20,31 @@ export default function Dashboard() {
       </section>
 
       {/* Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
         {/* Full-width */}
-        <section aria-labelledby="next-appointment-heading" className="lg:col-span-2">
+        <section aria-labelledby="next-appointment-heading" className="md:col-span-2 lg:col-span-8">
           <h2 id="next-appointment-heading" className="sr-only">
             Next Appointment
           </h2>
-           <NextAppointmentCard />
+          <NextAppointmentCard />
+        </section>
+        <section aria-labelledby="clinical-preview-heading" className="md:col-span-2 lg:col-span-4">
+          <h2 id="clinical-preview-heading" className="sr-only">
+            Clinical Preview
+          </h2>
+          <ClinicalPreviewCard />
         </section>
 
         {/* Left column */}
-        <section aria-labelledby="appointments-heading">
+        <section aria-labelledby="appointments-heading" className="md:col-span-2 lg:col-span-6">
           <h2 id="appointments-heading" className="sr-only">
             Today&apos;s Appointments
           </h2>
           <AppointmentListCard />
         </section>
-        <section aria-labelledby="tasks-heading">
+        <section aria-labelledby="tasks-heading" className="md:col-span-2 lg:col-span-6">
           <h2 id="tasks-heading" className="sr-only">
-            Open&apos;s Tasks
+            Open Tasks
           </h2>
           <TasksCard />
         </section>

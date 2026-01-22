@@ -1,3 +1,4 @@
+import AppointmentListSkeleton from '@/app/(app)/dashboard/components/AppointmentList/AppointmentListSkeleton'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChevronRight } from 'lucide-react'
@@ -42,6 +43,10 @@ const appointments: Appointment[] = [
 ]
 
 export default function AppointmentListCard() {
+  const isLoading = false
+  if (isLoading) {
+    return <AppointmentListSkeleton />
+  }
   return (
     <Card className="gap-0">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -51,7 +56,6 @@ export default function AppointmentListCard() {
           View Full Schedule →
         </Button>
       </CardHeader>
-
       <CardContent className="divide-y">
         {appointments.map((appt) => (
           <Button
@@ -87,7 +91,7 @@ export default function AppointmentListCard() {
 
               {/* Right */}
               <div className="text-muted-foreground">
-                <ChevronRight className="h-5 w-5" />
+                <ChevronRight className="h-5 w-5 me-1" />
               </div>
             </div>
           </Button>

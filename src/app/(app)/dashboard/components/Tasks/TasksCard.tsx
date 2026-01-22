@@ -1,3 +1,4 @@
+import TasksSkeleton from '@/app/(app)/dashboard/components/Tasks/TasksSkeleton'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChevronRight, FileText, HeartPulse } from 'lucide-react'
@@ -20,6 +21,10 @@ const tasks = [
 ]
 
 export default function TasksCard() {
+  const isLoading = false
+  if (isLoading) {
+    return <TasksSkeleton />
+  }
   return (
     <Card className="gap-0">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -51,7 +56,7 @@ export default function TasksCard() {
               </div>
               {/* Right */}
               <div className="text-muted-foreground">
-                <ChevronRight className="h-5 w-5" />
+                <ChevronRight className="h-5 w-5 me-1" />
               </div>
             </div>
           </Button>
