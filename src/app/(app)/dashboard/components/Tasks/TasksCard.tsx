@@ -26,7 +26,7 @@ export default function TasksCard() {
     return <TasksSkeleton />
   }
   return (
-    <Card className="gap-0">
+    <Card className="gap-0 h-full">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Open Tasks</CardTitle>
 

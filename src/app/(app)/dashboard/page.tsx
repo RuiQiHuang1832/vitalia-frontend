@@ -20,15 +20,18 @@ export default function Dashboard() {
       </section>
 
       {/* Dashboard Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 ">
         {/* Full-width */}
-        <section aria-labelledby="next-appointment-heading" className="md:col-span-2 lg:col-span-8">
+        <section
+          aria-labelledby="next-appointment-heading"
+          className="md:col-span-2 lg:col-span-8 "
+        >
           <h2 id="next-appointment-heading" className="sr-only">
             Next Appointment
           </h2>
           <NextAppointmentCard />
         </section>
-        <section aria-labelledby="clinical-preview-heading" className="md:col-span-2 lg:col-span-4">
+        <section aria-labelledby="clinical-preview-heading" className="md:col-span-2 lg:col-span-4 ">
           <h2 id="clinical-preview-heading" className="sr-only">
             Clinical Preview
           </h2>

@@ -82,7 +82,7 @@ export default function NextAppointmentCard() {
   const age = calculateAge(dob)
   const MRN = generateUiMrn(patientInfo.id)
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
         <div>
           <CardTitle>
@@ -108,7 +108,7 @@ export default function NextAppointmentCard() {
         </CardAction>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {/* Patient + Appointment Info */}
         <div className="flex items-start gap-4">
           {/* Avatar / Initials */}

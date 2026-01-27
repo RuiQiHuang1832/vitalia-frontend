@@ -1,24 +1,17 @@
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
-const SkeletonLine = ({ width, height = 'h-5' }: { width: string; height?: string }) => (
-  <div className={`${width} ${height} rounded bg-muted`}></div>
-)
-
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function AppointmentListSkeleton() {
   return (
-    <Card className="w-full sticky animate-pulse flex-none">
+    <Card className="w-full sticky flex-none">
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
-        <CardTitle>
-          <SkeletonLine width="w-50" />
-        </CardTitle>
-        <CardAction>
-          <SkeletonLine width="w-50" />
-        </CardAction>
+        <Skeleton className="w-50 h-4" />
+        <Skeleton className="w-50 h-4" />
       </CardHeader>
       <CardContent className="space-y-4">
         {[...Array(4)].map((_, index) => (
-          <SkeletonLine key={index} width="w-full h-12" />
+          <Skeleton key={index} className="w-full h-12" />
         ))}
       </CardContent>
     </Card>

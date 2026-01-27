@@ -1,48 +1,24 @@
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 
-const SkeletonLine = ({ width, height = 'h-5' }: { width: string; height?: string }) => (
-  <div className={`${width} ${height} rounded bg-muted`}></div>
-)
-
-const SkeletonGroup = ({ lines }: { lines: string[] }) => (
-  <div className="space-y-3 mt-5">
-    {lines.map((width, index) => (
-      <SkeletonLine key={index} width={width} />
-    ))}
-  </div>
-)
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function NextAppointmentSkeleton() {
   return (
-    <Card className="w-full sticky animate-pulse flex-none">
+    <Card className="w-full sticky flex-none">
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
-        <CardTitle>
-          <SkeletonLine width="w-50" />
-        </CardTitle>
-        <CardAction>
-          <SkeletonLine width="w-50" />
-        </CardAction>
+        <Skeleton className="w-50 h-5" />
+        <Skeleton className="w-50 h-5" />
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-start gap-2">
-          <SkeletonLine width="w-70" />
-          <SkeletonLine width="w-50" />
-          <SkeletonLine width="w-20" />
-        </div>
-        <SkeletonGroup lines={['w-[80%]', 'w-1/3', 'w-1/4']} />
+      <CardContent className="space-y-5">
+        {[...Array(6)].map((_, index) => (
+          <Skeleton key={index} className="w-full h-5" />
+        ))}
       </CardContent>
       <CardFooter>
         <div className="flex items-start gap-2">
-          <SkeletonLine width="w-30" />
-          <SkeletonLine width="w-30" />
-          <SkeletonLine width="w-30" />
+          <Skeleton className="w-30 h-5" />
+          <Skeleton className="w-30 h-5" />
+          <Skeleton className="w-30 h-5" />
         </div>
       </CardFooter>
     </Card>
