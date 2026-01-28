@@ -2,7 +2,6 @@ import NextAppointmentSkeleton from '@/app/(app)/dashboard/components/NextAppoin
 import { Button } from '@/components/ui/button'
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -11,6 +10,7 @@ import {
 } from '@/components/ui/card'
 import { Stack } from '@/components/ui/stack'
 import { useProviderAppointments } from '@/hooks/useProviderAppointments'
+import { getNameColors } from '@/lib/colorMap'
 import { calculateAge, capitalize, cn } from '@/lib/utils'
 import { Calendar, MapPin, User } from 'lucide-react'
 import { generateUiMrn } from '../../lib/helper'
@@ -81,38 +81,32 @@ export default function NextAppointmentCard() {
   // console.log(patientInfo)
   const age = calculateAge(dob)
   const MRN = generateUiMrn(patientInfo.id)
+  const { bg, text } = getNameColors(firstName)
+
   return (
     <Card className="h-full">
-      <CardHeader className="flex flex-row items-start justify-between space-y-0">
-        <div>
-          <CardTitle>
-            <Stack gap={2} className="items-center">
-              <span className="relative flex size-2.5 items-center">
-                <span
-                  className={cn(
-                    'absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75'
-                  )}
-                ></span>
-                <span className="relative inline-flex size-2.5 rounded-full bg-green-500"></span>
-              </span>
-              Next Appointment
-            </Stack>
-          </CardTitle>
-          <CardDescription>{label}</CardDescription>
-        </div>
-
-        <CardAction>
-          <Button variant="link" size="sm">
-            View Full Schedule →
-          </Button>
-        </CardAction>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b">
+        <CardTitle>Next Appointment</CardTitle>
+        <CardDescription className="text-xs font-medium  px-2 py-1 text-black bg-accent rounded-full">
+          <Stack gap={2}>
+            <span className="relative flex size-2.5 items-center">
+              <span
+                className={cn(
+                  'absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75'
+                )}
+              ></span>
+              <span className="relative inline-flex size-2.5 rounded-full bg-green-500"></span>
+            </span>
+            {label}
+          </Stack>
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
         {/* Patient + Appointment Info */}
         <div className="flex items-start gap-4">
           {/* Avatar / Initials */}
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted font-medium">
+          <div className={`flex h-12 w-12 items-center justify-center rounded-full ${bg} ${text} font-medium`}>
             {firstName.charAt(0)}
             {lastName.charAt(0)}
           </div>
@@ -149,7 +143,7 @@ export default function NextAppointmentCard() {
         <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
           <div>
             <p className="text-sm font-medium text-muted-foreground">Primary Concern</p>
-            <p className="font-medium">{reason}</p>
+            <p className="font-medium text-sm">{reason}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-6 text-sm">
@@ -166,7 +160,7 @@ export default function NextAppointmentCard() {
         </div>
       </CardContent>
 
-      <CardFooter className="flex gap-2">
+      <CardFooter className="flex gap-2 mt-3">
         <Button>Start Visit</Button>
         <Button variant="outline">View Chart</Button>
         <Button variant="outline">Add Vitals</Button>

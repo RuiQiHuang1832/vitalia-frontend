@@ -9,7 +9,7 @@ export default function ClinicalPreviewCard() {
   }
   return (
     <Card className="gap-0 h-full">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between border-b">
         <CardTitle>Clinical Preview</CardTitle>
         <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
           Current Patient

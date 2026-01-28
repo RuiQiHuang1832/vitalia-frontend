@@ -27,7 +27,7 @@ export default function TasksCard() {
   }
   return (
     <Card className="gap-0 h-full">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between px-0 mx-6 border-b">
         <CardTitle>Open Tasks</CardTitle>
 
         <Button variant="link" className="px-0">

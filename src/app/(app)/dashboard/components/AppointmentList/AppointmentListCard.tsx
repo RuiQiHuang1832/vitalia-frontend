@@ -1,6 +1,7 @@
 import AppointmentListSkeleton from '@/app/(app)/dashboard/components/AppointmentList/AppointmentListSkeleton'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getNameColors } from '@/lib/colorMap'
 import { ChevronRight } from 'lucide-react'
 
 type Appointment = {
@@ -49,7 +50,7 @@ export default function AppointmentListCard() {
   }
   return (
     <Card className="gap-0">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between px-0 mx-6 border-b">
         <CardTitle>Today’s Schedule</CardTitle>
 
         <Button variant="link" className="px-0">
@@ -57,11 +58,13 @@ export default function AppointmentListCard() {
         </Button>
       </CardHeader>
       <CardContent className="divide-y">
-        {appointments.map((appt) => (
+        {appointments.map((appt) => {
+          const { bg, text } = getNameColors(appt.name)
+          return (
           <Button
             key={appt.id}
             variant="ghost"
-            className="h-auto w-full p-0 justify-between"
+            className={`h-auto w-full p-0 justify-between`}
             asChild
           >
             <div className={`flex items-center justify-between py-4`}>
@@ -73,7 +76,7 @@ export default function AppointmentListCard() {
                 </div>
 
                 {/* Avatar */}
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-sm font-medium">
+                <div className={`flex h-9 w-9 items-center justify-center rounded-full ${bg} ${text} text-sm font-medium`}>
                   {appt.name
                     .split(' ')
                     .map((n) => n.charAt(0))
@@ -95,7 +98,8 @@ export default function AppointmentListCard() {
               </div>
             </div>
           </Button>
-        ))}
+        )
+        })}
       </CardContent>
     </Card>
   )

@@ -18,12 +18,14 @@ import {
 } from '@/components/ui/sidebar'
 import { useCurrentUserDisplay } from '@/hooks/useCurrentUserDisplay'
 import { logout } from '@/lib/auth'
+import { getNameColors } from '@/lib/colorMap'
 import { capitalize } from '@/lib/utils'
 import { BadgeCheck, Bell, ChevronsUpDown, LogOut, Wrench } from 'lucide-react'
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { greeting, fullName, displayName, avatar, email, specialty, isLoading } =
     useCurrentUserDisplay()
+  const { bg, text } = getNameColors(fullName || 'User')
 
   return (
     <SidebarMenu>
@@ -41,7 +43,7 @@ export function NavUser() {
               ) : (
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={avatar} alt={fullName} />
-                  <AvatarFallback className="rounded-lg">
+                  <AvatarFallback className={`rounded-lg ${bg} ${text}`}>
                     {capitalize(fullName.charAt(0))}
                   </AvatarFallback>
                 </Avatar>

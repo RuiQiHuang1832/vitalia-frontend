@@ -4,7 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function NextAppointmentSkeleton() {
   return (
-    <Card className="w-full sticky flex-none">
+    <Card className="size-full sticky flex-none">
       <CardHeader className="flex flex-row items-start justify-between space-y-0">
         <Skeleton className="w-50 h-5" />
         <Skeleton className="w-50 h-5" />
