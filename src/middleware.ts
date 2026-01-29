@@ -20,7 +20,7 @@ function redirectLoggedInFromLogin(req: NextRequest, role: Role) {
   if (req.nextUrl.pathname === '/login') {
     switch (role) {
       case 'PATIENT':
-        return NextResponse.redirect(new URL('/patient', req.url))
+        return NextResponse.redirect(new URL('/portal', req.url))
       case 'PROVIDER':
         return NextResponse.redirect(new URL('/dashboard', req.url))
       case 'ADMIN':
@@ -34,7 +34,7 @@ function redirectLoggedInFromLogin(req: NextRequest, role: Role) {
 function enforceRoleRoutes(req: NextRequest, role: Role) {
   const { pathname } = req.nextUrl
 
-  if (pathname.startsWith('/patient') && role !== 'PATIENT') {
+  if (pathname.startsWith('/portal') && role !== 'PATIENT') {
     return NextResponse.redirect(new URL('/unauthorized', req.url))
   }
 
@@ -63,5 +63,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/login', '/dashboard/:path*', '/patient/:path*', '/admin/:path*'],
+  matcher: ['/login', '/dashboard/:path*', '/portal/:path*', '/admin/:path*'],
 }

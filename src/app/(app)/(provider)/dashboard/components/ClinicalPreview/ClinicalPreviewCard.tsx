@@ -1,4 +1,4 @@
-import ClinicalPreviewSkeleton from '@/app/(app)/dashboard/components/ClinicalPreview/ClinicalPreviewSkeleton'
+import ClinicalPreviewSkeleton from '@/app/(app)/(provider)/dashboard/components/ClinicalPreview/ClinicalPreviewSkeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LuPillBottle } from 'react-icons/lu'
 

@@ -5,17 +5,17 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { LayoutDashboard } from 'lucide-react'
-
+import Link from 'next/link'
 export function NavDashboard() {
   return (
     <SidebarGroup>
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton asChild tooltip="Dashboard">
-            <a href="/dashboard">
+            <Link href="/dashboard">
               <LayoutDashboard />
               Dashboard
-            </a>
+            </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

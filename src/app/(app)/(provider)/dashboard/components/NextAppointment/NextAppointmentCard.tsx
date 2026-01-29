@@ -1,4 +1,4 @@
-import NextAppointmentSkeleton from '@/app/(app)/dashboard/components/NextAppointment/NextAppointmentSkeleton'
+import NextAppointmentSkeleton from '@/app/(app)/(provider)/dashboard/components/NextAppointment/NextAppointmentSkeleton'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -12,7 +12,7 @@ import { Stack } from '@/components/ui/stack'
 import { useProviderAppointments } from '@/hooks/useProviderAppointments'
 import { getNameColors } from '@/lib/colorMap'
 import { calculateAge, capitalize, cn } from '@/lib/utils'
-import { Calendar, MapPin, User } from 'lucide-react'
+import { Activity, Calendar, HeartPulse, MapPin, User } from 'lucide-react'
 import { generateUiMrn } from '../../lib/helper'
 
 function formatTimeRange(startTime: string, endTime?: string) {
@@ -106,7 +106,9 @@ export default function NextAppointmentCard() {
         {/* Patient + Appointment Info */}
         <div className="flex items-start gap-4">
           {/* Avatar / Initials */}
-          <div className={`flex h-12 w-12 items-center justify-center rounded-full ${bg} ${text} font-medium`}>
+          <div
+            className={`flex h-12 w-12 items-center justify-center rounded-full ${bg} ${text} font-medium`}
+          >
             {firstName.charAt(0)}
             {lastName.charAt(0)}
           </div>
@@ -146,16 +148,20 @@ export default function NextAppointmentCard() {
             <p className="font-medium text-sm">{reason}</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 text-sm">
-            <span className="text-slate-500">
-              HR
-              <span className="ml-1 font-semibold text-slate-900">72 bpm</span>
-            </span>
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-1">
+              <HeartPulse color="red" className="h-4 w-4" />
+              <span>
+                <strong>72</strong> bpm
+              </span>
+            </div>
 
-            <span className="text-slate-500">
-              BP
-              <span className="ml-1 font-semibold text-slate-900">118 / 76</span>
-            </span>
+            <div className="flex items-center gap-1">
+              <Activity color="blue" className="h-4 w-4" />
+              <span>
+                <strong>118 / 76</strong>
+              </span>
+            </div>
           </div>
         </div>
       </CardContent>

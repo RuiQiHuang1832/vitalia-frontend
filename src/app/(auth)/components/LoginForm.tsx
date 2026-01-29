@@ -70,7 +70,7 @@ export default function LoginForm() {
       // Redirect by role
       switch (payload.user.role) {
         case 'PATIENT':
-          router.replace('/patient')
+          router.replace('/portal')
           break
         case 'PROVIDER':
           router.replace('/dashboard')

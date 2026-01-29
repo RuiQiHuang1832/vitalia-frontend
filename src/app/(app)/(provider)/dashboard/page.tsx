@@ -1,9 +1,9 @@
 'use client'
-import AppointmentListCard from '@/app/(app)/dashboard/components/AppointmentList/AppointmentListCard'
-import ClinicalPreviewCard from '@/app/(app)/dashboard/components/ClinicalPreview/ClinicalPreviewCard'
-import NextAppointmentCard from '@/app/(app)/dashboard/components/NextAppointment/NextAppointmentCard'
-import TasksCard from '@/app/(app)/dashboard/components/Tasks/TasksCard'
-import { getTimeGreeting } from '@/app/(app)/dashboard/lib/helper'
+import AppointmentListCard from '@/app/(app)/(provider)/dashboard/components/AppointmentList/AppointmentListCard'
+import ClinicalPreviewCard from '@/app/(app)/(provider)/dashboard/components/ClinicalPreview/ClinicalPreviewCard'
+import NextAppointmentCard from '@/app/(app)/(provider)/dashboard/components/NextAppointment/NextAppointmentCard'
+import TasksCard from '@/app/(app)/(provider)/dashboard/components/Tasks/TasksCard'
+import { getTimeGreeting } from '@/app/(app)/(provider)/dashboard/lib/helper'
 import { useCurrentUserDisplay } from '@/hooks/useCurrentUserDisplay'
 export default function Dashboard() {
   const { greeting } = useCurrentUserDisplay()
@@ -31,7 +31,10 @@ export default function Dashboard() {
           </h2>
           <NextAppointmentCard />
         </section>
-        <section aria-labelledby="clinical-preview-heading" className="md:col-span-2 lg:col-span-4 ">
+        <section
+          aria-labelledby="clinical-preview-heading"
+          className="md:col-span-2 lg:col-span-4 "
+        >
           <h2 id="clinical-preview-heading" className="sr-only">
             Clinical Preview
           </h2>

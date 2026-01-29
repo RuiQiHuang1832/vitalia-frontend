@@ -36,7 +36,7 @@ const providerNavigation = {
       items: [
         {
           title: 'Patient List',
-          url: '#',
+          url: '/patients',
         },
       ],
     },
