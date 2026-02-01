@@ -26,9 +26,8 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       className={`${GeistSans.variable} ${GeistSans.className}`}
-    ><body className="antialiased ">
-          {children}
-      </body>
+    >
+      <body className="antialiased ">{children}</body>
     </html>
   )
 }

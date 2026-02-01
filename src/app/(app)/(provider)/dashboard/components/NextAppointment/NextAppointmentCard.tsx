@@ -12,8 +12,64 @@ import { Stack } from '@/components/ui/stack'
 import { useProviderAppointments } from '@/hooks/useProviderAppointments'
 import { getNameColors } from '@/lib/colorMap'
 import { calculateAge, capitalize, cn } from '@/lib/utils'
-import { Activity, Calendar, HeartPulse, MapPin, User } from 'lucide-react'
+import { Activity, Calendar, Droplet, HeartPulse, MapPin, Thermometer, User } from 'lucide-react'
+import { PiClipboardTextDuotone } from 'react-icons/pi'
 import { generateUiMrn } from '../../lib/helper'
+
+export const vitalsSummary = [
+  {
+    id: 'bp',
+    label: 'Blood Pressure',
+    value: '120/80',
+    unit: 'mmHg',
+    subtext: '120 / 80 MT',
+    trend: 'higher',
+    trendValue: '1%',
+    icon: Activity,
+    bg: 'bg-orange-50',
+    text: 'text-orange-700',
+    trendColor: 'text-green-600',
+  },
+  {
+    id: 'glucose',
+    label: 'Blood Glucose',
+    value: '97.22',
+    unit: 'mmol/L',
+    subtext: '97.22',
+    trend: 'lower',
+    trendValue: '2%',
+    icon: Droplet,
+    bg: 'bg-emerald-50',
+    text: 'text-emerald-700',
+    trendColor: 'text-red-500',
+  },
+  {
+    id: 'temp',
+    label: 'Body Temp.',
+    value: '99.5',
+    unit: '°F',
+    subtext: '99.5 °F',
+    trend: 'higher',
+    trendValue: '2%',
+    icon: Thermometer,
+    bg: 'bg-cyan-50',
+    text: 'text-cyan-700',
+    trendColor: 'text-emerald-600',
+  },
+  {
+    id: 'hr',
+    label: 'Heart Rate',
+    value: '72',
+    unit: 'bpm',
+    subtext: '72 bpm',
+    trend: 'lower',
+    trendValue: '2%',
+    icon: HeartPulse,
+    bg: 'bg-blue-50',
+    text: 'text-blue-700',
+    trendColor: 'text-fuchsia-500',
+  },
+]
 
 function formatTimeRange(startTime: string, endTime?: string) {
   const start = new Date(startTime.replace(' ', 'T'))
@@ -141,32 +197,50 @@ export default function NextAppointmentCard() {
           </div>
         </div>
 
-        {/* Primary Concern */}
-        <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
+        <div className="rounded-lg border bg-blue-50/50 border-l-4 border-l-blue-400 p-3 pl-4 space-y-2">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Primary Concern</p>
-            <p className="font-medium text-sm">{reason}</p>
-          </div>
-
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1">
-              <HeartPulse color="red" className="h-4 w-4" />
-              <span>
-                <strong>72</strong> bpm
-              </span>
+            <div className="flex items-center gap-2 mb-1 ">
+              <PiClipboardTextDuotone className="h-4 w-4" />
+              <p className="text font-medium text-sm">Reason for visit</p>
             </div>
 
-            <div className="flex items-center gap-1">
-              <Activity color="blue" className="h-4 w-4" />
-              <span>
-                <strong>118 / 76</strong>
-              </span>
-            </div>
+            <p className="font-medium text text-slate-900 text-sm">{reason}</p>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {vitalsSummary.map((vital) => {
+            const Icon = vital.icon
+
+            return (
+              <div key={vital.id} className={`rounded-lg border p-3 ${vital.bg}`}>
+                <Stack className="mb-2">
+                  <p className={`text font-medium ${vital.text}`}>
+                    {vital.value}
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">
+                      {vital.unit}
+                    </span>
+                  </p>
+                </Stack>
+
+                <p className="text-sm font-medium text-slate-900">{vital.label}</p>
+
+                <Stack justify="between" className=" mt-2 text-xs">
+                  <Stack gap={1} className="text-muted-foreground">
+                    <Icon className="h-3.5 w-3.5" />
+                    {vital.subtext}
+                  </Stack>
+                  <span className={vital.trendColor}>
+                    {vital.trendValue} {vital.trend}
+                  </span>
+                </Stack>
+              </div>
+            )
+          })}
         </div>
       </CardContent>
 
-      <CardFooter className="flex gap-2 mt-3">
+      <CardFooter className="flex gap-2">
         <Button>Start Visit</Button>
         <Button variant="outline">View Chart</Button>
         <Button variant="outline">Add Vitals</Button>

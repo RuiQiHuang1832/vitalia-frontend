@@ -91,7 +91,7 @@ export default function LoginForm() {
 
   return (
     <Card className="w-full sm:max-w-md">
-      <CardHeader className="text-center ">
+      <CardHeader className="text-center relative">
         <CardTitle className="text-2xl font-bold">Vitalia</CardTitle>
         <CardDescription>
           Modern clinical records, simplified. <br /> Built for providers, patients, and care teams.

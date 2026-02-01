@@ -21,15 +21,15 @@ export default function ClinicalPreviewCard() {
             Active Problems
           </div>{' '}
           <ul className="space-y-1">
-            <li className="flex items-center text-sm text-gray-700">
+            <li className="flex items-center text-sm ">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mr-2"></span>
               Hypertension <span className="ml-1 text-gray-400 text-xs">(I10)</span>
             </li>
-            <li className="flex items-center text-sm text-gray-700">
+            <li className="flex items-center text-sm ">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mr-2"></span>
               Type 2 Diabetes Mellitus
             </li>
-            <li className="flex items-center text-sm text-gray-700">
+            <li className="flex items-center text-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mr-2"></span>
               Hyperlipidemia
             </li>
@@ -59,15 +59,15 @@ export default function ClinicalPreviewCard() {
             Medication
           </div>
           <ul>
-            <li className="flex items-center text-sm text-gray-700">
+            <li className="flex items-center text-sm ">
               <LuPillBottle className="mr-2" />
               Lisinopril <span className="ml-1 text-gray-400 text-sm">(10 mg daily)</span>
             </li>
-            <li className="flex items-center text-sm text-gray-700">
+            <li className="flex items-center text-sm ">
               <LuPillBottle className="mr-2" />
               Metformin <span className="ml-1 text-gray-400 text-sm">(10 mg daily)</span>
             </li>
-            <li className="flex items-center text-sm text-gray-700">
+            <li className="flex items-center text-sm ">
               <LuPillBottle className="mr-2" />
               Metformin <span className="ml-1 text-gray-400 text-sm">(10 mg daily)</span>
             </li>
