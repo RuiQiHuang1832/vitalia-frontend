@@ -2,8 +2,6 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 // Note: Columns are where you define the core of what your table will look like. They define the data that will be displayed, how it will be formatted, sorted and filtered.
-import { ArrowUpDown, MoreHorizontal } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -14,13 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ArrowDown, ArrowUp } from 'lucide-react'
+import { calculateAge } from '@/lib/utils'
+import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from 'lucide-react'
+import { MdClear } from 'react-icons/md'
 
 export type Patient = {
   mrn: string
   name: string
-  dob: Date
-  gender: 'Male' | 'Female' | 'Prefer not to say'
+  age: Date
   provider: string
   status: 'active' | 'inactive' | 'discharged'
 }
@@ -35,7 +34,6 @@ export const columns: ColumnDef<Patient>[] = [
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
-        className=""
       />
     ),
     cell: ({ row }) => (
@@ -81,6 +79,7 @@ export const columns: ColumnDef<Patient>[] = [
 
             {isSorted && (
               <DropdownMenuItem onClick={() => column.clearSorting()}>
+                <MdClear className="mr-2 h-4 w-4" />
                 Clear sorting
               </DropdownMenuItem>
             )}
@@ -90,22 +89,47 @@ export const columns: ColumnDef<Patient>[] = [
     },
   },
   {
-    accessorKey: 'dob',
-    header: () => <div className="">DOB</div>,
-    cell: ({ getValue }) => {
-      const date = getValue() as Date
-      const formatted = date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+    accessorKey: 'age',
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
 
-      return <div className="font-medium">{formatted}</div>
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2 -ml-3">
+              Age
+              {!isSorted && <ArrowUpDown className="h-4 w-4" />}
+              {isSorted === 'asc' && <ArrowUp className="h-4 w-4" />}
+              {isSorted === 'desc' && <ArrowDown className="h-4 w-4" />}
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+              <ArrowUp className="mr-2 h-4 w-4" />
+              Sort ascending
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+              <ArrowDown className="mr-2 h-4 w-4" />
+              Sort descending
+            </DropdownMenuItem>
+
+            {isSorted && (
+              <DropdownMenuItem onClick={() => column.clearSorting()}>
+                <MdClear className="mr-2 h-4 w-4" />
+                Clear sorting
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
     },
-  },
-  {
-    accessorKey: 'gender',
-    header: 'Gender',
+    cell: ({ getValue }) => {
+      const dob = getValue() as string
+      const age = calculateAge(dob)
+      return <div>{age}</div>
+    },
   },
   {
     accessorKey: 'provider',
@@ -113,7 +137,55 @@ export const columns: ColumnDef<Patient>[] = [
   },
   {
     accessorKey: 'status',
-    header: 'Status',
+    filterFn: (row, columnId, filterValue) => {
+      const value = row.getValue(columnId)
+
+      // No filter → keep row
+      if (!filterValue) return true
+
+      // Multi-select
+      if (Array.isArray(filterValue)) {
+        return filterValue.includes(value)
+      }
+
+      // Single-select
+      return value === filterValue
+    },
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2 -ml-3">
+              Status
+              {!isSorted && <ArrowUpDown className="h-4 w-4" />}
+              {isSorted === 'asc' && <ArrowUp className="h-4 w-4" />}
+              {isSorted === 'desc' && <ArrowDown className="h-4 w-4" />}
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+              <ArrowUp className="mr-2 h-4 w-4" />
+              Sort ascending
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+              <ArrowDown className="mr-2 h-4 w-4" />
+              Sort descending
+            </DropdownMenuItem>
+
+            {isSorted && (
+              <DropdownMenuItem onClick={() => column.clearSorting()}>
+                <MdClear className="mr-2 h-4 w-4" />
+                Clear sorting
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    },
   },
 
   {

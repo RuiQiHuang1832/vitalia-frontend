@@ -1,5 +1,6 @@
 'use client'
 
+import { DataTableFacetedFilter } from '@/app/(app)/(provider)/patients/table/components/DataTableFacetedFilter'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -28,9 +29,12 @@ import {
   SortingState,
   useReactTable,
   VisibilityState,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
 } from '@tanstack/react-table'
 import { useState } from 'react'
-
+import { IoMdAdd } from 'react-icons/io'
+import { VscSettings } from 'react-icons/vsc'
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
@@ -52,7 +56,8 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     state: {
       sorting,
       columnFilters,
@@ -60,6 +65,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
       rowSelection,
     },
   })
+  const statusColumn = table.getColumn('status')
 
   return (
     <div>
@@ -70,10 +76,22 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
           onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
           className="max-w-sm"
         />
+        {statusColumn && (
+          <DataTableFacetedFilter
+            column={statusColumn}
+            title="Status"
+            options={[
+              { label: 'Active', value: 'active' },
+              { label: 'Inactive', value: 'inactive' },
+              { label: 'Discharged', value: 'discharged' },
+            ]}
+          />
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
-              Columns
+              <VscSettings className="size-4" />
+              View
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -94,6 +112,9 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
               })}
           </DropdownMenuContent>
         </DropdownMenu>
+        <Button>
+          <IoMdAdd className="!text-white h-4 w-4" /> Add New Patient
+        </Button>
       </Stack>
       <div className="overflow-hidden rounded-md border">
         <Table>
@@ -133,23 +154,29 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
           </TableBody>
         </Table>
       </div>
-      <Stack justify="end" className="space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+      <Stack justify="between" className="space-x-2 py-4">
+        <div className="text-muted-foreground text-sm">
+          {table.getFilteredSelectedRowModel().rows.length} of{' '}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+        <div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </Stack>
     </div>
   )

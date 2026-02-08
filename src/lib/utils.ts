@@ -21,7 +21,7 @@ export function calculateAge(dobIso: string): number {
     (today.getMonth() === dob.getMonth() && today.getDate() >= dob.getDate())
 
   if (!hasHadBirthdayThisYear) {
-    age -= 1
+    age--
   }
 
   return age

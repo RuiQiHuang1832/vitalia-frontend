@@ -10,7 +10,6 @@ const tasks = [
     count: 1,
     href: '#',
     icon: HeartPulse,
-    color: 'red',
   },
   {
     id: 'missing-notes',
@@ -18,7 +17,6 @@ const tasks = [
     count: 1,
     href: '#',
     icon: FileText,
-    color: '#1D4ED8',
   },
   {
     id: 'unsigned-notes',
@@ -26,7 +24,6 @@ const tasks = [
     count: 3,
     href: '#',
     icon: PenLine,
-    color: '#F59E0B', // amber / warning
   },
 ]
 
@@ -59,7 +56,7 @@ export default function TasksCard() {
                 <div
                   className={`flex h-9 w-9 items-center justify-center rounded-full bg-muted text-sm font-medium`}
                 >
-                  {<task.icon color={task.color} className="size-5" />}
+                  {<task.icon className="size-5" />}
                 </div>
                 {/* Name + Meta */}
                 <div className="font-medium">
