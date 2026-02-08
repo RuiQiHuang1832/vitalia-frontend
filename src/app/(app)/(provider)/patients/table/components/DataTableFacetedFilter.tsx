@@ -24,7 +24,7 @@ export function DataTableFacetedFilter<TData>({
         <Button variant="outline" className=" border-dashed">
           <LuCirclePlus className="size-4" />
           {title}
-          {selectedValues.size > 0 && (
+          {selectedValues?.size > 0 && (
             <>
               <Separator orientation="vertical" className="mx-2" />
               <Badge className="rounded-md" variant="outline">
