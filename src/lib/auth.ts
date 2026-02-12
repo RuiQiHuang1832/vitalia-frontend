@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/app/(auth)/stores/auth.store'
-import { apiUrl } from '@/lib/api'
+import { apiUrl } from '@/lib/api.shared'
 export async function hydrateAuth() {
   const justLoggedIn = sessionStorage.getItem('justLoggedIn')
 

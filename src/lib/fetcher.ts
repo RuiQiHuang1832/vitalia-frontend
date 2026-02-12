@@ -1,4 +1,4 @@
-import { apiUrl } from './api'
+import { apiUrl } from './api.shared'
 
 export const swrFetcher = async (url: string) => {
   const res = await fetch(apiUrl(url), { credentials: 'include' })

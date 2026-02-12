@@ -2,6 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 // Note: Columns are where you define the core of what your table will look like. They define the data that will be displayed, how it will be formatted, sorted and filtered.
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -9,24 +10,37 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Stack } from '@/components/ui/stack'
+import { getNameColors } from '@/lib/colorMap'
 import { calculateAge } from '@/lib/utils'
-import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from 'lucide-react'
-import { MdClear } from 'react-icons/md'
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Copy,
+  Eye,
+  ListChecks,
+  MoreHorizontal,
+  Trash2,
+  X,
+} from 'lucide-react'
+import { LuStethoscope } from 'react-icons/lu'
 
-export type Patient = {
-  mrn: string
-  name: string
-  age: Date
-  provider: string
-  status: 'active' | 'inactive' | 'discharged'
-}
+import type { Patient } from '../types'
 
 export const columns: ColumnDef<Patient>[] = [
   {
     id: 'select',
+    size: 40,
     header: ({ table }) => (
       <Checkbox
         checked={
@@ -49,9 +63,28 @@ export const columns: ColumnDef<Patient>[] = [
   {
     accessorKey: 'mrn',
     header: 'MRN',
+    size: 120,
   },
   {
     accessorKey: 'name',
+    size: 200,
+    cell: ({ getValue }) => {
+      const fullName = getValue() as string
+      const { bg, text } = getNameColors(fullName || 'User')
+      return (
+        <Stack>
+          <div
+            className={`flex h-9 w-9 items-center justify-center rounded-full ${bg} ${text} text-sm font-medium`}
+          >
+            {fullName
+              .split(' ')
+              .map((n) => n.charAt(0))
+              .join('')}
+          </div>
+          <div className="font-medium">{fullName}</div>
+        </Stack>
+      )
+    },
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
 
@@ -68,18 +101,18 @@ export const columns: ColumnDef<Patient>[] = [
 
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-              <ArrowUp className="mr-2 h-4 w-4" />
+              <ArrowUp className="h-4 w-4" />
               Sort ascending
             </DropdownMenuItem>
 
             <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-              <ArrowDown className="mr-2 h-4 w-4" />
+              <ArrowDown className="h-4 w-4" />
               Sort descending
             </DropdownMenuItem>
 
             {isSorted && (
               <DropdownMenuItem onClick={() => column.clearSorting()}>
-                <MdClear className="mr-2 h-4 w-4" />
+                <X className="h-4 w-4" />
                 Clear sorting
               </DropdownMenuItem>
             )}
@@ -90,6 +123,7 @@ export const columns: ColumnDef<Patient>[] = [
   },
   {
     accessorKey: 'age',
+    size: 80,
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
 
@@ -106,18 +140,18 @@ export const columns: ColumnDef<Patient>[] = [
 
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-              <ArrowUp className="mr-2 h-4 w-4" />
+              <ArrowUp className="h-4 w-4" />
               Sort ascending
             </DropdownMenuItem>
 
             <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-              <ArrowDown className="mr-2 h-4 w-4" />
+              <ArrowDown className="h-4 w-4" />
               Sort descending
             </DropdownMenuItem>
 
             {isSorted && (
               <DropdownMenuItem onClick={() => column.clearSorting()}>
-                <MdClear className="mr-2 h-4 w-4" />
+                <X className="h-4 w-4" />
                 Clear sorting
               </DropdownMenuItem>
             )}
@@ -134,9 +168,30 @@ export const columns: ColumnDef<Patient>[] = [
   {
     accessorKey: 'provider',
     header: 'Provider',
+    cell: ({ getValue }) => {
+      const providerName = getValue() as string
+      return (
+        <Stack>
+          <LuStethoscope className="h-4 w-4" />
+          {providerName}
+        </Stack>
+      )
+    },
+    size: 200,
   },
   {
     accessorKey: 'status',
+    size: 150,
+    cell: ({ getValue }) => {
+      const status = getValue() as Patient['status']
+      const statusOptions: Array<{ value: Patient['status']; label: string; color: string }> = [
+        { value: 'active', label: 'Active', color: 'bg-green-50 text-green-700' },
+        { value: 'inactive', label: 'Inactive', color: 'bg-amber-50 text-amber-700' },
+        { value: 'discharged', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
+      ]
+      const option = statusOptions.find((option) => option.value === status)
+      return <Badge className={option?.color}>{option?.label}</Badge>
+    },
     filterFn: (row, columnId, filterValue) => {
       const value = row.getValue(columnId)
 
@@ -167,18 +222,18 @@ export const columns: ColumnDef<Patient>[] = [
 
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-              <ArrowUp className="mr-2 h-4 w-4" />
+              <ArrowUp className="h-4 w-4" />
               Sort ascending
             </DropdownMenuItem>
 
             <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-              <ArrowDown className="mr-2 h-4 w-4" />
+              <ArrowDown className="h-4 w-4" />
               Sort descending
             </DropdownMenuItem>
 
             {isSorted && (
               <DropdownMenuItem onClick={() => column.clearSorting()}>
-                <MdClear className="mr-2 h-4 w-4" />
+                <X className="h-4 w-4" />
                 Clear sorting
               </DropdownMenuItem>
             )}
@@ -190,8 +245,14 @@ export const columns: ColumnDef<Patient>[] = [
 
   {
     id: 'actions',
+    size: 50,
     cell: ({ row }) => {
       const patient = row.original
+      const statusOptions: Array<{ value: Patient['status']; label: string; color: string }> = [
+        { value: 'active', label: 'Active', color: 'bg-green-50 text-green-700' },
+        { value: 'inactive', label: 'Inactive', color: 'bg-gray-50 text-gray-700' },
+        { value: 'discharged', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
+      ]
 
       return (
         <DropdownMenu>
@@ -202,13 +263,39 @@ export const columns: ColumnDef<Patient>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText('stuff')}>
-              Copy payment ID
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(patient.mrn)}>
+              <Copy className="h-4 w-4" />
+              Copy MRN
             </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Eye className="h-4 w-4" />
+              View Patient
+            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="gap-2">
+                <ListChecks className="h-4 w-4" />
+                Set Status
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuLabel className="text-muted-foreground text-xs">
+                    Status
+                  </DropdownMenuLabel>
+                  <DropdownMenuRadioGroup value={patient.status}>
+                    {statusOptions.map((option) => (
+                      <DropdownMenuRadioItem key={option.value} value={option.value}>
+                        {option.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive">
+              <Trash2 className="h-4 w-4" />
+              Delete Patient
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
