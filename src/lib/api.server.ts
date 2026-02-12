@@ -11,6 +11,7 @@ export async function getPatients() {
     headers: {
       Cookie: cookieHeader,
     },
+    credentials: 'include',
   })
   if (!res.ok) throw new Error('Failed to fetch patients')
 
