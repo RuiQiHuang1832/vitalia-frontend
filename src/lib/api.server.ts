@@ -1,19 +1,24 @@
-import { cookies } from 'next/headers'
-
-import { apiUrl } from './api.shared'
+import { headers } from 'next/headers'
 
 export async function getPatients() {
-  const cookieStore = await cookies()
-  const cookieHeader = cookieStore.toString()
+  const headerList = await headers()
 
-  const res = await fetch(apiUrl('/patients'), {
+  const host = headerList.get('host')
+  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https'
+
+  const cookieHeader = headerList.get('cookie') || ''
+
+  const res = await fetch(`${protocol}://${host}/api/patients`, {
     cache: 'no-store',
     headers: {
       Cookie: cookieHeader,
     },
-    credentials: 'include',
   })
-  if (!res.ok) throw new Error('Failed to fetch patients')
+
+  if (!res.ok) {
+    console.log('Status:', res.status)
+    throw new Error('Failed to fetch patients')
+  }
 
   return res.json()
 }
