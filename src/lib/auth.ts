@@ -1,5 +1,4 @@
 import { useAuthStore } from '@/app/(auth)/stores/auth.store'
-import { apiUrl } from '@/lib/api.shared'
 export async function hydrateAuth() {
   const justLoggedIn = sessionStorage.getItem('justLoggedIn')
 
@@ -9,7 +8,7 @@ export async function hydrateAuth() {
     return
   }
   try {
-    const res = await fetch(apiUrl('/auth/me'), {
+    const res = await fetch('/api/auth/me', {
       credentials: 'include',
     })
     if (!res.ok) {
@@ -32,7 +31,7 @@ export async function hydrateAuth() {
 }
 
 export async function logout() {
-  await fetch(apiUrl('/auth/logout'), {
+  await fetch('/api/auth/logout', {
     method: 'POST',
     credentials: 'include',
   })

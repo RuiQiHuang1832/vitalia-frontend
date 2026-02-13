@@ -1,7 +1,6 @@
-import { apiUrl } from './api.shared'
 
 export const swrFetcher = async (url: string) => {
-  const res = await fetch(apiUrl(url), { credentials: 'include' })
+  const res = await fetch(`/api${url}`, { credentials: 'include' })
 
   const data = await res.json().catch(() => null)
 
