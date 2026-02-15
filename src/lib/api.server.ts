@@ -2,7 +2,6 @@ import { headers } from 'next/headers'
 
 export async function getPatients() {
   const headerList = await headers()
-  console.log('ENV:', process.env.NODE_ENV)
 
   const host = headerList.get('host')
   const forwardedProto = headerList.get('x-forwarded-proto')
@@ -14,10 +13,10 @@ export async function getPatients() {
   const url = new URL('/api/patients', baseUrl)
 
   const res = await fetch(url, {
-  cache: 'no-store',
-  headers: {
-    Cookie: cookieHeader,
-  },
+    cache: 'no-store',
+    headers: {
+      Cookie: cookieHeader,
+    },
   })
   if (!res.ok) {
     console.log('Status:', res.status)

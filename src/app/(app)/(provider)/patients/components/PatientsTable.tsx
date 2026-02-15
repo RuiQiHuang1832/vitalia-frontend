@@ -13,7 +13,7 @@ export default function PatientsTable({ initialData }: { initialData: PatientsRe
     const rows = payload?.data ?? []
     return rows.map((p) => ({
       mrn: `MRN-${String(p.id).padStart(6, '0')}`,
-      name: `${p.firstName} ${p.lastName}`,
+      name: `${p.firstName.charAt(0).toUpperCase() + p.firstName.slice(1)} ${p.lastName.charAt(0).toUpperCase() + p.lastName.slice(1)}`,
       age: new Date(p.dob),
       lastVisit: p.appointments[0]?.startTime ?? null,
       status: p.status,

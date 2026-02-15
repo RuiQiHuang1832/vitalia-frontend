@@ -42,9 +42,9 @@ import {
 import { LuX } from 'react-icons/lu'
 
 import { useState } from 'react'
-import { IoMdAdd } from 'react-icons/io'
 import { LuChevronLeft, LuChevronRight, LuChevronsLeft, LuChevronsRight } from 'react-icons/lu'
 import { VscSettings } from 'react-icons/vsc'
+import { AddPatientSheet } from '@/app/(app)/(provider)/patients/table/components/AddPatientSheet'
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
@@ -129,9 +129,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
               })}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button>
-          <IoMdAdd className="!text-white h-4 w-4" /> Add New Patient
-        </Button>
+        <AddPatientSheet />
       </Stack>
       <div className=" overflow-hidden rounded-md border">
         <Table className="table-fixed">

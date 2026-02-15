@@ -81,7 +81,7 @@ export const columns: ColumnDef<Patient>[] = [
               .map((n) => n.charAt(0))
               .join('')}
           </div>
-          <div className="font-medium">{fullName}</div>
+          <div className="font-medium">{fullName.trim()}</div>
         </Stack>
       )
     },
