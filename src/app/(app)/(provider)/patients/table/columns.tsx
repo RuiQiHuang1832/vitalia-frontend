@@ -230,8 +230,6 @@ export const columns: ColumnDef<Patient>[] = [
         { value: 'DISCHARGED', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
       ]
       const option = statusOptions.find((option) => option.value === status)
-      console.log('STATUS VALUE:', status)
-      console.log('STATUS TYPE:', typeof status)
       return <Badge className={option?.color}>{option?.label}</Badge>
     },
     filterFn: (row, columnId, filterValue) => {

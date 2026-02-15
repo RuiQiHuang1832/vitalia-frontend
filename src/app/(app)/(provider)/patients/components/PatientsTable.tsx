@@ -19,6 +19,7 @@ export default function PatientsTable({ initialData }: { initialData: PatientsRe
       status: p.status,
     }))
   }, [payload?.data])
+  console.log(tableData)
 
   if (error) {
     return <div>Error loading patient data. Try refreshing the page.</div>
