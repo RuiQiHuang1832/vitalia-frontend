@@ -28,12 +28,12 @@ import {
   ArrowUpDown,
   Copy,
   Eye,
+  History,
   ListChecks,
   MoreHorizontal,
   Trash2,
   X,
 } from 'lucide-react'
-import { LuStethoscope } from 'react-icons/lu'
 
 import type { Patient } from '../types'
 
@@ -166,14 +166,54 @@ export const columns: ColumnDef<Patient>[] = [
     },
   },
   {
-    accessorKey: 'provider',
-    header: 'Provider',
+    accessorKey: 'lastVisit',
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2 -ml-3">
+              Last Visit
+              {!isSorted && <ArrowUpDown className="h-4 w-4" />}
+              {isSorted === 'asc' && <ArrowUp className="h-4 w-4" />}
+              {isSorted === 'desc' && <ArrowDown className="h-4 w-4" />}
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+              <ArrowUp className="h-4 w-4" />
+              Sort ascending
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+              <ArrowDown className="h-4 w-4" />
+              Sort descending
+            </DropdownMenuItem>
+
+            {isSorted && (
+              <DropdownMenuItem onClick={() => column.clearSorting()}>
+                <X className="h-4 w-4" />
+                Clear sorting
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    },
     cell: ({ getValue }) => {
-      const providerName = getValue() as string
+      const lastVisit = getValue() as Date | null
       return (
         <Stack>
-          <LuStethoscope className="h-4 w-4" />
-          {providerName}
+          <History className="h-4 w-4" />
+          {lastVisit
+            ? new Date(lastVisit).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })
+            : 'No visits'}
         </Stack>
       )
     },
@@ -185,9 +225,9 @@ export const columns: ColumnDef<Patient>[] = [
     cell: ({ getValue }) => {
       const status = getValue() as Patient['status']
       const statusOptions: Array<{ value: Patient['status']; label: string; color: string }> = [
-        { value: 'active', label: 'Active', color: 'bg-green-50 text-green-700' },
-        { value: 'inactive', label: 'Inactive', color: 'bg-amber-50 text-amber-700' },
-        { value: 'discharged', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
+        { value: 'ACTIVE', label: 'Active', color: 'bg-green-50 text-green-700' },
+        { value: 'INACTIVE', label: 'Inactive', color: 'bg-amber-50 text-amber-700' },
+        { value: 'DISCHARGED', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
       ]
       const option = statusOptions.find((option) => option.value === status)
       return <Badge className={option?.color}>{option?.label}</Badge>
@@ -249,9 +289,9 @@ export const columns: ColumnDef<Patient>[] = [
     cell: ({ row }) => {
       const patient = row.original
       const statusOptions: Array<{ value: Patient['status']; label: string; color: string }> = [
-        { value: 'active', label: 'Active', color: 'bg-green-50 text-green-700' },
-        { value: 'inactive', label: 'Inactive', color: 'bg-gray-50 text-gray-700' },
-        { value: 'discharged', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
+        { value: 'ACTIVE', label: 'Active', color: 'bg-green-50 text-green-700' },
+        { value: 'INACTIVE', label: 'Inactive', color: 'bg-gray-50 text-gray-700' },
+        { value: 'DISCHARGED', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
       ]
 
       return (

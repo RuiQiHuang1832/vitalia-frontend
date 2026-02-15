@@ -1,9 +1,12 @@
+type status = 'ACTIVE' | 'INACTIVE' | 'DISCHARGED'
+type gender = 'MALE' | 'FEMALE' | 'UNSPECIFIED'
+
 export type Patient = {
   mrn: string
   name: string
   age: Date
-  provider: string
-  status: 'active' | 'inactive' | 'discharged'
+  status: status
+  lastVisit: Date | null
 }
 
 export type ApiPatient = {
@@ -12,10 +15,14 @@ export type ApiPatient = {
   firstName: string
   lastName: string
   dob: string
-  gender: 'MALE' | 'FEMALE' | 'UNSPECIFIED'
+  gender: gender
   phone: string
   email: string
   createdAt: string
+  status: status
+  appointments: {
+    startTime: Date
+  }[]
 }
 
 export type PatientsResponse = {

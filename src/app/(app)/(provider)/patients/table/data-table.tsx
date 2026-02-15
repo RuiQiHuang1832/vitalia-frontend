@@ -93,9 +93,9 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
             column={statusColumn}
             title="Status"
             options={[
-              { label: 'Active', value: 'active' },
-              { label: 'Inactive', value: 'inactive' },
-              { label: 'Discharged', value: 'discharged' },
+              { label: 'Active', value: 'ACTIVE' },
+              { label: 'Inactive', value: 'INACTIVE' },
+              { label: 'Discharged', value: 'DISCHARGED' },
             ]}
           />
         )}

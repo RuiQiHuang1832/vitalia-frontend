@@ -6,7 +6,7 @@ import { DataTable } from '../table/data-table'
 import type { Patient } from '../types'
 import { PatientsResponse } from '../types'
 
-export default function PatientsTable({ initialData }: { initialData: PatientsResponse}) {
+export default function PatientsTable({ initialData }: { initialData: PatientsResponse }) {
   const { data: payload, error } = usePatients(initialData)
 
   const tableData: Patient[] = useMemo(() => {
@@ -15,11 +15,10 @@ export default function PatientsTable({ initialData }: { initialData: PatientsRe
       mrn: `MRN-${String(p.id).padStart(6, '0')}`,
       name: `${p.firstName} ${p.lastName}`,
       age: new Date(p.dob),
-      provider: 'Unknown',
-      status: 'active',
+      lastVisit: p.appointments[0]?.startTime ?? null,
+      status: p.status,
     }))
   }, [payload?.data])
-
   if (error) {
     return <div>Error loading patient data. Try refreshing the page.</div>
   }
