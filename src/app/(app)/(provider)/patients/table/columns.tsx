@@ -13,7 +13,6 @@ import {
   DropdownMenuPortal,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -31,7 +30,6 @@ import {
   History,
   ListChecks,
   MoreHorizontal,
-  Trash2,
   X,
 } from 'lucide-react'
 
@@ -62,7 +60,41 @@ export const columns: ColumnDef<Patient>[] = [
   },
   {
     accessorKey: 'mrn',
-    header: 'MRN',
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2 -ml-3">
+              MRN
+              {!isSorted && <ArrowUpDown className="h-4 w-4" />}
+              {isSorted === 'asc' && <ArrowUp className="h-4 w-4" />}
+              {isSorted === 'desc' && <ArrowDown className="h-4 w-4" />}
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+              <ArrowUp className="h-4 w-4" />
+              Sort ascending
+            </DropdownMenuItem>
+
+            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+              <ArrowDown className="h-4 w-4" />
+              Sort descending
+            </DropdownMenuItem>
+
+            {isSorted && (
+              <DropdownMenuItem onClick={() => column.clearSorting()}>
+                <X className="h-4 w-4" />
+                Clear sorting
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    },
     size: 120,
   },
   {
@@ -168,39 +200,7 @@ export const columns: ColumnDef<Patient>[] = [
   {
     accessorKey: 'lastVisit',
     header: ({ column }) => {
-      const isSorted = column.getIsSorted()
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 -ml-3">
-              Last Visit
-              {!isSorted && <ArrowUpDown className="h-4 w-4" />}
-              {isSorted === 'asc' && <ArrowUp className="h-4 w-4" />}
-              {isSorted === 'desc' && <ArrowDown className="h-4 w-4" />}
-            </Button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-              <ArrowUp className="h-4 w-4" />
-              Sort ascending
-            </DropdownMenuItem>
-
-            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-              <ArrowDown className="h-4 w-4" />
-              Sort descending
-            </DropdownMenuItem>
-
-            {isSorted && (
-              <DropdownMenuItem onClick={() => column.clearSorting()}>
-                <X className="h-4 w-4" />
-                Clear sorting
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
+      return <div>Last Visit</div>
     },
     cell: ({ getValue }) => {
       const lastVisit = getValue() as Date | null
@@ -217,6 +217,7 @@ export const columns: ColumnDef<Patient>[] = [
         </Stack>
       )
     },
+    enableSorting: false,
     size: 200,
   },
   {
@@ -331,11 +332,6 @@ export const columns: ColumnDef<Patient>[] = [
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
-              <Trash2 className="h-4 w-4" />
-              Delete Patient
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )

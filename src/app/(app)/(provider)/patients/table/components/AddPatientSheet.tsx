@@ -17,6 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
 import { ImSpinner2 } from 'react-icons/im'
 import { IoMdAdd } from 'react-icons/io'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 const createPatientSchema = z.object({
@@ -52,28 +53,39 @@ export function AddPatientSheet() {
     try {
       const res = await fetch('/api/patients', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
 
-      const result = await res.json() // 👈 THIS is key
+      const result = await res.json()
 
       if (!res.ok) {
+        // Duplicate email case (409)
+        if (res.status === 409) {
+          form.setError('email', {
+            type: 'server',
+            message: result.message || 'Email already registered',
+          })
+          return
+        }
+
         throw new Error(result.message || 'Something went wrong')
       }
 
-      console.log('Created:', result)
-    } catch (err) {
-      console.error('Error creating patient:', err)
+      toast.success('Patient created successfully')
+
+      form.reset()
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Something went wrong'
+      toast.error(errorMessage)
     }
   }
+
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button>
-          <IoMdAdd className="!text-white h-4 w-4 mr-2" />
+          <IoMdAdd className="!text-white h-4 w-4" />
           Add New Patient
         </Button>
       </SheetTrigger>
@@ -87,7 +99,7 @@ export function AddPatientSheet() {
         </SheetHeader>
 
         <form id="create-patient-form" onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="grid py-6 px-4 gap-8">
+          <div className="grid px-4 gap-8">
             {/* -------------------- Basic Info -------------------- */}
             <div className="space-y-5">
               <h3 className="text-sm font-semibold text-muted-foreground">Basic Information</h3>

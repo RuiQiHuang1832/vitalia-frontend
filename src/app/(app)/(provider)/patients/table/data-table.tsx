@@ -32,60 +32,99 @@ import {
   getCoreRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
-  getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
   SortingState,
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
 import { LuX } from 'react-icons/lu'
 
-import { useState } from 'react'
+import { AddPatientSheet } from '@/app/(app)/(provider)/patients/table/components/AddPatientSheet'
+import useDebounce from '@/hooks/useDebounce'
+import { useEffect, useState } from 'react'
 import { LuChevronLeft, LuChevronRight, LuChevronsLeft, LuChevronsRight } from 'react-icons/lu'
 import { VscSettings } from 'react-icons/vsc'
-import { AddPatientSheet } from '@/app/(app)/(provider)/patients/table/components/AddPatientSheet'
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  pagination: {
+    pageIndex: number
+    pageSize: number
+  }
+  setPagination: React.Dispatch<React.SetStateAction<{ pageIndex: number; pageSize: number }>>
+  pageCount: number
+  totalCount: number
+  columnFilters: ColumnFiltersState
+  setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFiltersState>>
+  sorting: SortingState
+  setSorting: React.Dispatch<React.SetStateAction<SortingState>>
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+  pagination,
+  setPagination,
+  pageCount,
+  totalCount,
+  columnFilters,
+  setColumnFilters,
+  sorting,
+  setSorting,
+}: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
+  const [searchInput, setSearchInput] = useState('')
+  const debouncedSearch = useDebounce(searchInput, 500)
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
     onRowSelectionChange: setRowSelection,
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    manualPagination: true,
+    manualSorting: true,
+    manualFiltering: true,
+    pageCount: pageCount,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination,
     },
   })
   const statusColumn = table.getColumn('status')
   const pageSize = table.getState().pagination.pageSize
   const isFiltered = table.getState().columnFilters.length > 0
+  const currentNameFilter =
+    (columnFilters.find((f) => f.id === 'name')?.value as string | undefined) ?? ''
+
+  // Keep input synced when filters are reset/changed externally
+  useEffect(() => {
+    setSearchInput(currentNameFilter)
+  }, [currentNameFilter])
+
+  // Apply debounced text to table filter (server-side filtering trigger)
+  useEffect(() => {
+    const value = debouncedSearch.trim()
+    table.getColumn('name')?.setFilterValue(value || undefined)
+  }, [debouncedSearch, table])
 
   return (
-    <div >
+    <div>
       <Stack className=" py-4">
         <Input
           placeholder="Filter names..."
-          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
+          value={searchInput}
+          onChange={(event) => setSearchInput(event.target.value)}
           className="max-w-sm"
         />
         {statusColumn && (
@@ -93,15 +132,16 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
             column={statusColumn}
             title="Status"
             options={[
-              { label: 'Active', value: 'ACTIVE' },
-              { label: 'Inactive', value: 'INACTIVE' },
-              { label: 'Discharged', value: 'DISCHARGED' },
+              { value: 'ACTIVE', label: 'Active', color: 'bg-green-50 text-green-700' },
+              { value: 'INACTIVE', label: 'Inactive', color: 'bg-amber-50 text-amber-700' },
+              { value: 'DISCHARGED', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
             ]}
           />
         )}
         {isFiltered && (
           <Button variant="ghost" onClick={() => table.resetColumnFilters()}>
-            Reset<LuX />
+            Reset
+            <LuX />
           </Button>
         )}
         <DropdownMenu>
@@ -171,8 +211,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
       </div>
       <Stack justify="between" className="space-x-2 py-4">
         <div className="text-muted-foreground text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{' '}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {table.getFilteredSelectedRowModel().rows.length} of {totalCount} row(s) selected.
         </div>
         <Stack className="space-x-8">
           <Stack>

@@ -1,3 +1,4 @@
+import { Toaster } from '@/components/ui/sonner'
 import { GeistSans } from 'geist/font/sans'
 import type { Metadata } from 'next'
 import './globals.css'
@@ -28,6 +29,7 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistSans.className}`}
     >
       <body className="antialiased ">{children}</body>
+      <Toaster richColors position="bottom-left" />
     </html>
   )
 }

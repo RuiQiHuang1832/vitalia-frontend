@@ -3,7 +3,7 @@ import { getPatients } from '@/lib/api.server'
 
 export default async function PatientsPage() {
   // Fetch patients on the server to avoid hydration/loading states on the client. Server sends fully rendered HTML with data, improving performance and SEO.
-  const initialData = await getPatients()
+  const initialData = await getPatients({ page: 1, limit: 10 })
 
   return (
     <div>
