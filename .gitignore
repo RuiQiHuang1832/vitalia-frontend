@@ -42,6 +42,9 @@ next-env.d.ts
 /notes.md
 /.env.local
 /test-results
+.auth/
+/tests/.auth/
 /.vscode/tasks.json
 /test_docs
 /test_docs.md
+/.env.test

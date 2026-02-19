@@ -19,8 +19,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Stack } from '@/components/ui/stack'
+import { useUpdatePatient } from '@/hooks/useUpdatePatient'
 import { getNameColors } from '@/lib/colorMap'
 import { calculateAge } from '@/lib/utils'
+import type { Row } from '@tanstack/react-table'
 import {
   ArrowDown,
   ArrowUp,
@@ -32,8 +34,81 @@ import {
   MoreHorizontal,
   X,
 } from 'lucide-react'
-
+import { toast } from 'sonner'
+import { useSWRConfig } from 'swr'
 import type { Patient } from '../types'
+import Link from 'next/link'
+const statusOptions: Array<{ value: Patient['status']; label: string; color: string }> = [
+  { value: 'ACTIVE', label: 'Active', color: 'bg-green-50 text-green-700' },
+  { value: 'INACTIVE', label: 'Inactive', color: 'bg-gray-50 text-gray-700' },
+  { value: 'DISCHARGED', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
+]
+
+function ActionsCell({ row }: { row: Row<Patient> }) {
+  const patient = row.original
+
+  const { updatePatient, isLoading } = useUpdatePatient()
+  const getIdFromMrn = (mrn: string) => Number.parseInt(mrn.replace(/^MRN-/, ''), 10)
+  const { mutate } = useSWRConfig()
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <span className="sr-only">Open menu</span>
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(patient.mrn)}>
+          <Copy className="h-4 w-4" />
+          Copy MRN
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/patients/${getIdFromMrn(patient.mrn)}`}>
+            <Eye className="h-4 w-4" />
+            View Patient
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="gap-2">
+            <ListChecks className="h-4 w-4" />
+            Set Status
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent>
+              <DropdownMenuLabel className="text-muted-foreground text-xs">
+                Status
+              </DropdownMenuLabel>
+              <DropdownMenuRadioGroup
+                value={patient.status}
+                onValueChange={async (value) => {
+                  const nextStatus = value as Patient['status']
+                  if (isLoading) return
+                  if (nextStatus === patient.status) return
+                  const patientId = getIdFromMrn(patient.mrn)
+                  try {
+                    await updatePatient(patientId, { status: nextStatus })
+                    await mutate((key) => typeof key === 'string' && key.startsWith('/patients/?'))
+                    toast.success(`${patient.name} is now ${nextStatus}`)
+                  } catch (error) {
+                    toast.error((error as Error).message)
+                  }
+                }}
+              >
+                {statusOptions.map((option) => (
+                  <DropdownMenuRadioItem key={option.value} value={option.value}>
+                    {option.label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
 
 export const columns: ColumnDef<Patient>[] = [
   {
@@ -199,7 +274,7 @@ export const columns: ColumnDef<Patient>[] = [
   },
   {
     accessorKey: 'lastVisit',
-    header: ({ column }) => {
+    header: () => {
       return <div>Last Visit</div>
     },
     cell: ({ getValue }) => {
@@ -287,54 +362,6 @@ export const columns: ColumnDef<Patient>[] = [
   {
     id: 'actions',
     size: 50,
-    cell: ({ row }) => {
-      const patient = row.original
-      const statusOptions: Array<{ value: Patient['status']; label: string; color: string }> = [
-        { value: 'ACTIVE', label: 'Active', color: 'bg-green-50 text-green-700' },
-        { value: 'INACTIVE', label: 'Inactive', color: 'bg-gray-50 text-gray-700' },
-        { value: 'DISCHARGED', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
-      ]
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(patient.mrn)}>
-              <Copy className="h-4 w-4" />
-              Copy MRN
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Eye className="h-4 w-4" />
-              View Patient
-            </DropdownMenuItem>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="gap-2">
-                <ListChecks className="h-4 w-4" />
-                Set Status
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  <DropdownMenuLabel className="text-muted-foreground text-xs">
-                    Status
-                  </DropdownMenuLabel>
-                  <DropdownMenuRadioGroup value={patient.status}>
-                    {statusOptions.map((option) => (
-                      <DropdownMenuRadioItem key={option.value} value={option.value}>
-                        {option.label}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
+    cell: ({ row }) => <ActionsCell row={row} />,
   },
 ]

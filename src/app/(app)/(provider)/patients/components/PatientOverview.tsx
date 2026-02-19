@@ -1,3 +1,7 @@
-export default function PatientOverview() {
-  return <div>PatientOverview</div>
+type PatientOverviewProps = {
+  id: number
+}
+
+export default function PatientOverview({ id }: PatientOverviewProps) {
+  return <div>PatientOverview for patient {id}</div>
 }
