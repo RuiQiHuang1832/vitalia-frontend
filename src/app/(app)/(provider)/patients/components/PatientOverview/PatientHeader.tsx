@@ -2,20 +2,12 @@ import { PatientBase, type Patient } from '@/app/(app)/(provider)/patients/types
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Stack } from '@/components/ui/stack'
-import { calculateAge } from '@/lib/utils'
+import { calculateAge, formatDate } from '@/lib/utils'
 import { Calendar, Clock, Mail, Phone, User } from 'lucide-react'
 import { IoMdMedical } from 'react-icons/io'
 import { AvatarWithBadge } from './PatientAvatar'
 type PatientHeaderProps = {
   data: PatientBase
-}
-
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 }
 
 function formatText(text: string) {

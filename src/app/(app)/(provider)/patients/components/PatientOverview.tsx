@@ -9,7 +9,7 @@ export default function PatientOverview({ id, data: fallback }: PatientOverview)
 
   if (!patient) return null
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 pb-10">
       <section aria-labelledby="patient-header-heading" className="col-span-12">
         <h2 id="patient-header-heading" className="sr-only">
           Patient Header

@@ -61,7 +61,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             </Breadcrumb>
           </div>
         </header>
-        <div className="flex-1 px-6 py-2">{children}</div>
+        <div className="flex-1 overflow-hidden px-6 py-2">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )

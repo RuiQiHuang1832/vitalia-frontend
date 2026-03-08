@@ -47,15 +47,7 @@ const providerNavigation = {
       items: [
         {
           title: 'Upcoming',
-          url: '#',
-        },
-        {
-          title: 'Past',
-          url: '#',
-        },
-        {
-          title: 'Calendar View',
-          url: '#',
+          url: '/appointments',
         },
       ],
     },

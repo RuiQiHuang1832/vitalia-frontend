@@ -1,4 +1,13 @@
 import { headers } from 'next/headers'
+import { jwtDecode } from 'jwt-decode'
+
+type TokenPayload = {
+  id: number
+  email: string
+  role: string
+  providerId: number | null
+  patientId: number | null
+}
 
 async function getServerRequestContext() {
   const headerList = await headers()
@@ -10,7 +19,16 @@ async function getServerRequestContext() {
   const cookieHeader = headerList.get('cookie') || ''
   const baseUrl = host ? `${protocol}://${host}` : 'http://localhost:3000'
 
-  return { baseUrl, cookieHeader }
+  const token = cookieHeader
+    .split('; ')
+    .find((c) => c.startsWith('accessToken='))
+    ?.split('=')
+    .slice(1)
+    .join('=')
+
+  const decoded = token ? jwtDecode<TokenPayload>(token) : null
+
+  return { baseUrl, cookieHeader, decoded }
 }
 
 export async function getPatients({
@@ -68,6 +86,48 @@ export async function getPatientById(id: number) {
   if (!res.ok) {
     throw new Error(`Failed to fetch patient ${id}`)
   }
-  
+
+  return res.json()
+}
+
+
+export async function getProviderAppointments({
+  page = 1,
+  limit = 10,
+  status,
+}: {
+  page?: number
+  limit?: number
+  status?: string[]
+}) {
+  const { baseUrl, cookieHeader, decoded } = await getServerRequestContext()
+
+  const providerId = decoded?.providerId
+  if (!providerId) {
+    throw new Error('Provider ID not found in token')
+  }
+
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  })
+
+  if (status && status.length > 0) {
+    status.forEach((s) => params.append('status', s))
+  }
+
+  const url = new URL(`/api/appointments/provider/${providerId}?${params.toString()}`, baseUrl)
+
+  const res = await fetch(url, {
+    cache: 'no-store',
+    headers: {
+      Cookie: cookieHeader,
+    },
+  })
+  if (!res.ok) {
+    console.log('Status:', res.status)
+    throw new Error('Failed to fetch appointments')
+  }
+
   return res.json()
 }

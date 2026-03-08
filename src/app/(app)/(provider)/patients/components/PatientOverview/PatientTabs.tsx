@@ -22,7 +22,6 @@ export default function PatientTabs({ data }: { data: PatientFull }) {
   }
   const vitalsData = {
     vitals,
-    appointments,
   }
   return (
     <Tabs defaultValue="overview">

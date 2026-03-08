@@ -51,15 +51,28 @@ export type PatientOverview = {
 
 export type Problem = {
   id: number
-  description: string
+  patientId: number
+  providerId: number
+  name: string
+  icdCode: string | null
+  description: string | null
+  status: 'ACTIVE' | 'RESOLVED'
   createdAt: string
+  resolvedAt: string | null
 }
 
 export type Allergy = {
   id: number
+  patientId: number
+  recordedById: number
+  category: 'FOOD' | 'MEDICATION' | 'ENVIRONMENTAL' | 'OTHER'
+  substance: string
+  reaction: string | null
   name: string
-  severity: string
+  severity: string | null
+  notes: string | null
   createdAt: string
+  updatedAt: string
 }
 
 export type Vital = {
@@ -84,7 +97,7 @@ export type Medication = {
   frequency: string
   startDate: string
   endDate: string | null
-  status: 'ACTIVE' | 'COMPLETED'
+  status: 'ACTIVE' | 'COMPLETED' | 'DISCONTINUED'
   notes: string | null
   createdAt: string
   updatedAt: string
@@ -101,6 +114,15 @@ export type Appointment = {
   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED'
   visitNote: VisitNote | null
 }
+
+export type AppointmentResponse = {
+  data: Appointment[]
+  totalCount: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
 export type VisitNote = {
   id: number
   appointmentId: number
