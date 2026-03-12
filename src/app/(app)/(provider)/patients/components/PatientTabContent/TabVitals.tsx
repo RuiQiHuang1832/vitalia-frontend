@@ -134,20 +134,28 @@ export default function TabVitals({ data }: { data: TabVitalsDataProps }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sorted.map((vital) => (
-              <TableRow key={vital.id}>
-                <TableCell className="font-medium">{formatDate(vital.recordedAt)}</TableCell>
-                <TableCell className="text-right">{vital.heartRate ?? '—'}</TableCell>
-                <TableCell className="text-right">
-                  {vital.bloodPressureSystolic != null && vital.bloodPressureDiastolic != null
-                    ? `${vital.bloodPressureSystolic}/${vital.bloodPressureDiastolic}`
-                    : '—'}
+            {sorted.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
+                  No vitals recorded.
                 </TableCell>
-                <TableCell className="text-right">{vital.temperature ?? '—'}</TableCell>
-                <TableCell className="text-right">{vital.weight ?? '—'}</TableCell>
-                <TableCell className="text-right">{vital.oxygenSaturation ?? '—'}</TableCell>
               </TableRow>
-            ))}
+            ) : (
+              sorted.map((vital) => (
+                <TableRow key={vital.id}>
+                  <TableCell className="font-medium">{formatDate(vital.recordedAt)}</TableCell>
+                  <TableCell className="text-right">{vital.heartRate ?? '—'}</TableCell>
+                  <TableCell className="text-right">
+                    {vital.bloodPressureSystolic != null && vital.bloodPressureDiastolic != null
+                      ? `${vital.bloodPressureSystolic}/${vital.bloodPressureDiastolic}`
+                      : '—'}
+                  </TableCell>
+                  <TableCell className="text-right">{vital.temperature ?? '—'}</TableCell>
+                  <TableCell className="text-right">{vital.weight ?? '—'}</TableCell>
+                  <TableCell className="text-right">{vital.oxygenSaturation ?? '—'}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </Card>

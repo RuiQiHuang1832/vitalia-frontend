@@ -1,31 +1,16 @@
-'use client'
 import AppointmentListSkeleton from '@/app/(app)/(provider)/appointments/components/AppointmentListSkeleton'
 import {
   type Appointment,
-  type AppointmentResponse,
-  type PatientBase,
+  type AppointmentWithPatient,
 } from '@/app/(app)/(provider)/patients/types'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { useProviderAppointments } from '@/hooks/useProviderAppointments'
+
 import { getNameColors } from '@/lib/colorMap'
 import { formatDate, formatTime } from '@/lib/utils'
-import { Calendar, ChevronLeft, ChevronRight, Clock, Play, Plus } from 'lucide-react'
-import { useState } from 'react'
-type Tab = 'upcoming' | 'past'
-
-type AppointmentWithPatient = Appointment & {
-  patient: PatientBase
-}
+import { Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 
 const statusVariant: Record<Appointment['status'], 'default' | 'secondary' | 'destructive'> = {
   SCHEDULED: 'default',
@@ -33,57 +18,38 @@ const statusVariant: Record<Appointment['status'], 'default' | 'secondary' | 'de
   CANCELLED: 'destructive',
 }
 
-export default function AppointmentList({ initialData }: { initialData: AppointmentResponse }) {
-  const [tab, setTab] = useState<Tab>('upcoming')
-  const [page, setPage] = useState(1)
+interface AppointmentListProps {
+  tab: string
+  appointments: AppointmentWithPatient[]
+  totalPages: number
+  page: number
+  onPageChange: (page: number) => void
+  onSelect: (appointment: AppointmentWithPatient) => void
+  selectedId: number | null
+  error: boolean
+  isLoading: boolean
+  hasData: boolean
+}
 
-  const { data, error, isLoading } = useProviderAppointments({
-    page,
-    limit: 10,
-    status: tab === 'upcoming' ? ['SCHEDULED'] : ['COMPLETED', 'CANCELLED'],
-    initialData: tab === 'upcoming' && page === 1 ? initialData : undefined,
-  })
-
-  const appointments = (data?.data ?? []) as AppointmentWithPatient[]
-  const totalPages = data?.totalPages ?? 0
-
-  function handleTabChange(value: string) {
-    setTab(value as Tab)
-    setPage(1)
-  }
-
+export default function AppointmentList({
+  tab,
+  appointments,
+  totalPages,
+  page,
+  onPageChange,
+  onSelect,
+  selectedId,
+  error,
+  isLoading,
+  hasData,
+}: AppointmentListProps) {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Select value={tab} onValueChange={handleTabChange}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="upcoming">Upcoming</SelectItem>
-              <SelectItem value="past">Past Appointments</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          {tab === 'upcoming' && appointments.length > 0 && (
-            <Button size="sm">
-              <Play className="size-3" />
-              Start Appointment
-            </Button>
-          )}
-          <Button variant="outline" size="sm">
-            <Plus className="size-3" />
-            New Appointment
-          </Button>
-        </div>
-      </div>
       {error && (
         <div className="text-destructive text-sm">Failed to load appointments. Try refreshing.</div>
       )}
 
-      {isLoading && !data && <AppointmentListSkeleton />}
+      {isLoading && !hasData && <AppointmentListSkeleton />}
 
       {!error && appointments.length === 0 && !isLoading && (
         <div className="text-muted-foreground text-sm py-8 text-center">
@@ -102,7 +68,11 @@ export default function AppointmentList({ initialData }: { initialData: Appointm
           const { bg, text } = getNameColors(patientName)
 
           return (
-            <Card key={appt.id}>
+            <Card
+              key={appt.id}
+              className={`cursor-pointer transition-colors hover:border-blue-400 ${selectedId === appt.id ? 'border-blue-400 ring-1 ring-primary/20' : ''}`}
+              onClick={() => onSelect(appt)}
+            >
               <CardHeader>
                 <div className="flex items-center gap-2 text-muted-foreground text-xs">
                   <Calendar className="size-3" />
@@ -110,7 +80,7 @@ export default function AppointmentList({ initialData }: { initialData: Appointm
                 </div>
                 <CardTitle className="text-base">
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12">
+                    <Avatar className="size-10">
                       <AvatarFallback className={`${bg} ${text}  font-medium`}>
                         {initials}
                       </AvatarFallback>
@@ -144,7 +114,7 @@ export default function AppointmentList({ initialData }: { initialData: Appointm
               variant="outline"
               size="sm"
               disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
+              onClick={() => onPageChange(page - 1)}
             >
               <ChevronLeft className="size-4" />
               Previous
@@ -153,7 +123,7 @@ export default function AppointmentList({ initialData }: { initialData: Appointm
               variant="outline"
               size="sm"
               disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => onPageChange(page + 1)}
             >
               Next
               <ChevronRight className="size-4" />

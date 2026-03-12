@@ -123,6 +123,10 @@ export type AppointmentResponse = {
   totalPages: number
 }
 
+export type AppointmentWithPatient = Appointment & {
+  patient: PatientBase
+}
+
 export type VisitNote = {
   id: number
   appointmentId: number

@@ -1,6 +1,14 @@
+import AddAppointmentDialog from '@/app/(app)/(provider)/patients/components/AddAppointmentDialog'
 import { PatientBase, type Patient } from '@/app/(app)/(provider)/patients/types'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Stack } from '@/components/ui/stack'
 import { calculateAge, formatDate } from '@/lib/utils'
 import { Calendar, Clock, Mail, Phone, User } from 'lucide-react'
@@ -37,6 +45,9 @@ export default function PatientHeader({ data: patient }: PatientHeaderProps) {
             <CardDescription>{getStatusBadge(patient.status)}</CardDescription>
           </div>
         </Stack>
+        <CardAction>
+          <AddAppointmentDialog patientId={patient.id} />
+        </CardAction>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4">
