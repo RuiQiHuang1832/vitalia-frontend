@@ -26,7 +26,11 @@ export default function AppointmentsClient({ initialData }: { initialData: Appoi
     initialData: tab === 'upcoming' && page === 1 ? initialData : undefined,
   })
 
-  const appointments = data?.data ?? []
+  const now = new Date()
+  const appointments =
+    tab === 'upcoming'
+      ? (data?.data ?? []).filter((appt: AppointmentWithPatient) => new Date(appt.startTime) >= now)
+      : (data?.data ?? [])
   const totalPages = data?.totalPages ?? 0
 
   function handleTabChange(value: string) {

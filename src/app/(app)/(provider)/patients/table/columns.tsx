@@ -175,21 +175,24 @@ export const columns: ColumnDef<Patient>[] = [
   {
     accessorKey: 'name',
     size: 200,
-    cell: ({ getValue }) => {
+    cell: ({ row, getValue }) => {
       const fullName = getValue() as string
       const { bg, text } = getNameColors(fullName || 'User')
+      const patientId = Number.parseInt(row.original.mrn.replace(/^MRN-/, ''), 10)
       return (
-        <Stack>
-          <div
-            className={`flex h-9 w-9 items-center justify-center rounded-full ${bg} ${text} text-sm font-medium`}
-          >
-            {fullName
-              .split(' ')
-              .map((n) => n.charAt(0))
-              .join('')}
-          </div>
-          <div className="font-medium">{fullName.trim()}</div>
-        </Stack>
+        <Link href={`/patients/${patientId}`} className="group">
+          <Stack>
+            <div
+              className={`flex h-9 w-9 items-center justify-center rounded-full ${bg} ${text} text-sm font-medium`}
+            >
+              {fullName
+                .split(' ')
+                .map((n) => n.charAt(0))
+                .join('')}
+            </div>
+            <div className="font-medium group-hover:underline">{fullName.trim()}</div>
+          </Stack>
+        </Link>
       )
     },
     header: ({ column }) => {

@@ -127,6 +127,18 @@ export type AppointmentWithPatient = Appointment & {
   patient: PatientBase
 }
 
+export type Weekday = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY'
+
+export type ProviderAvailability = {
+  id: number
+  providerId: number
+  workingDays: Weekday[]
+  startTime: string
+  endTime: string
+  createdAt: string
+  updatedAt: string
+}
+
 export type VisitNote = {
   id: number
   appointmentId: number

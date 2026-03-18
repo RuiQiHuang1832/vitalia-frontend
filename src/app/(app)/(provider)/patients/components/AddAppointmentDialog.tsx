@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuthStore } from '@/app/(auth)/stores/auth.store'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -12,23 +13,120 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { useProviderAppointments } from '@/hooks/useProviderAppointments'
+import { useProviderAvailability } from '@/hooks/useProviderAvailability'
+import { addMonths } from 'date-fns'
 import { Plus } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
+import { useSWRConfig } from 'swr'
+import type { Weekday } from '../types'
+const WEEKDAY_MAP: Record<number, Weekday> = {
+  1: 'MONDAY',
+  2: 'TUESDAY',
+  3: 'WEDNESDAY',
+  4: 'THURSDAY',
+  5: 'FRIDAY',
+}
 
-const AVAILABLE_TIMES = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00']
+function parseHour(time: string): number {
+  // Handles both "HH:mm" and ISO "...THH:mm..." formats
+  const isoMatch = time.match(/T(\d{2}):/)
+  if (isoMatch) return parseInt(isoMatch[1], 10)
+  const plainMatch = time.match(/^(\d{2}):(\d{2})$/)
+  if (plainMatch) return parseInt(plainMatch[1], 10)
+  return 0
+}
+
+function generateTimeSlots(startTime: string, endTime: string): string[] {
+  const startHour = parseHour(startTime)
+  const endHour = parseHour(endTime)
+  const slots: string[] = []
+  for (let h = startHour; h < endHour; h++) {
+    slots.push(`${String(h).padStart(2, '0')}:00`)
+  }
+  return slots
+}
 
 type AddAppointmentDialogProps = {
   patientId: number
 }
 
 export default function AddAppointmentDialog({ patientId }: AddAppointmentDialogProps) {
+  const { mutate } = useSWRConfig()
+  const providerId = useAuthStore((s) => s.providerId)
+
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
   const [reason, setReason] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const [open, setOpen] = useState(false)
+  const { data: availability } = useProviderAvailability()
+  const { data: appointments } = useProviderAppointments({
+    enabled: !!availability,
+    status: ['SCHEDULED'],
+    limit: 200,
+  })
 
-  function handleSubmit() {
+  const twoMonthsOut = useMemo(() => addMonths(new Date(), 2), [])
+
+  const allTimeSlots = useMemo(() => {
+    if (!availability) return []
+    return generateTimeSlots(availability.startTime, availability.endTime)
+  }, [availability])
+
+  // Build a set of booked time strings like "2026-03-15T09:00" for quick lookup
+  const bookedSlots = useMemo(() => {
+    const set = new Set<string>()
+    if (!appointments?.data) return set
+    const now = new Date()
+    for (const apt of appointments.data) {
+      if (apt.status !== 'SCHEDULED') continue
+      const start = new Date(apt.startTime)
+      // Ignore past appointments
+      if (start < now) continue
+      // Ignore appointments beyond 2 months
+      if (start > twoMonthsOut) continue
+      // Ignore non-hour-aligned times (e.g. 1:02)
+      if (start.getMinutes() !== 0) continue
+      // Key: YYYY-MM-DD|HH:00
+      const dateKey = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`
+      const timeKey = `${String(start.getHours()).padStart(2, '0')}:00`
+      set.add(`${dateKey}|${timeKey}`)
+    }
+    return set
+  }, [appointments, twoMonthsOut])
+
+  const availableTimesForDate = useMemo(() => {
+    if (!selectedDate || !availability) return []
+    const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
+    return allTimeSlots.filter((time) => !bookedSlots.has(`${dateKey}|${time}`))
+  }, [selectedDate, allTimeSlots, bookedSlots, availability])
+
+  // Disable dates that are not working days, in the past, beyond 2 months, or fully booked
+  const disabledDays = useMemo(() => {
+    if (!availability) return () => true
+    const workingDays = new Set(availability.workingDays)
+    return (date: Date) => {
+      const dayOfWeek = date.getDay() // 0=Sun, 1=Mon, ...
+      const weekday = WEEKDAY_MAP[dayOfWeek]
+      // Disable weekends or non-working days
+      if (!weekday || !workingDays.has(weekday)) return true
+      // Disable beyond 2 months
+      if (date > twoMonthsOut) return true
+      // Check if all slots are booked for this date
+      const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      const allBooked =
+        allTimeSlots.length > 0 &&
+        allTimeSlots.every((time) => bookedSlots.has(`${dateKey}|${time}`))
+      return allBooked
+    }
+  }, [availability, twoMonthsOut, allTimeSlots, bookedSlots])
+
+  async function handleSubmit() {
     if (!selectedDate || !selectedTime) return
+    setIsLoading(true)
 
     const [hours, minutes] = selectedTime.split(':').map(Number)
 
@@ -38,21 +136,45 @@ export default function AddAppointmentDialog({ patientId }: AddAppointmentDialog
     const endTime = new Date(startTime)
     endTime.setHours(startTime.getHours() + 1)
 
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const formatLocal = (d: Date) =>
+      `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+
     const payload = {
+      providerId,
       patientId,
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
-      reason: reason || null,
+      startTime: formatLocal(startTime),
+      endTime: formatLocal(endTime),
+      reason: reason || 'No reason provided',
     }
-
-    console.log('Appointment payload:', payload)
+    console.log(payload)
     // TODO: call API to create appointment
-    // await fetch('/api/appointments', { method: 'POST', body: JSON.stringify(payload) })
-
-    setOpen(false)
-    setSelectedDate(undefined)
-    setSelectedTime(null)
-    setReason('')
+    try {
+      const res = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data?.message || 'Failed to create appointment')
+      }
+      toast.success(
+        `Appointment scheduled for ${selectedDate.toLocaleDateString()} at ${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+      )
+      mutate(`/patients/${patientId}`)
+      setOpen(false)
+      setSelectedDate(undefined)
+      setSelectedTime(null)
+      setReason('')
+      setError(null)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
+      console.error(err)
+      setError(errorMessage)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -79,7 +201,9 @@ export default function AddAppointmentDialog({ patientId }: AddAppointmentDialog
                 setSelectedDate(date)
                 setSelectedTime(null)
               }}
-              disabled={{ before: new Date() }}
+              disabled={[{ before: new Date() }, disabledDays]}
+              startMonth={new Date()}
+              endMonth={twoMonthsOut}
             />
           </div>
 
@@ -96,16 +220,22 @@ export default function AddAppointmentDialog({ patientId }: AddAppointmentDialog
             </Label>
             <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
               {selectedDate ? (
-                AVAILABLE_TIMES.map((time) => (
-                  <Button
-                    key={time}
-                    variant={selectedTime === time ? 'default' : 'outline'}
-                    className="justify-center"
-                    onClick={() => setSelectedTime(time)}
-                  >
-                    {time}
-                  </Button>
-                ))
+                availableTimesForDate.length > 0 ? (
+                  availableTimesForDate.map((time) => (
+                    <Button
+                      key={time}
+                      variant={selectedTime === time ? 'default' : 'outline'}
+                      className="justify-center"
+                      onClick={() => setSelectedTime(time)}
+                    >
+                      {time}
+                    </Button>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No available time slots for this date.
+                  </p>
+                )
               ) : (
                 <p className="text-sm text-muted-foreground">
                   Please select a date to view available times.
@@ -120,19 +250,22 @@ export default function AddAppointmentDialog({ patientId }: AddAppointmentDialog
           <Label htmlFor="appointment-reason">Reason for visit</Label>
           <Textarea
             id="appointment-reason"
+            className="field-sizing-fixed"
             placeholder="e.g. Routine follow-up visit"
+            rows={7}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
           />
         </div>
+        {error && <p className="text-sm text-red-500">{error}</p>}
 
         {/* Submit */}
         <Button
           className="w-full hover:bg-teal-700 bg-teal-600 text-white"
-          disabled={!selectedDate || !selectedTime}
+          disabled={!selectedDate || !selectedTime || isLoading}
           onClick={handleSubmit}
         >
-          Confirm Appointment
+          {isLoading ? 'Scheduling...' : 'Confirm Appointment'}
         </Button>
       </DialogContent>
     </Dialog>

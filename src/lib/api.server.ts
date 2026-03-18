@@ -90,7 +90,6 @@ export async function getPatientById(id: number) {
   return res.json()
 }
 
-
 export async function getProviderAppointments({
   page = 1,
   limit = 10,
