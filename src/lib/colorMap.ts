@@ -1,9 +1,9 @@
 export const COLORS = [
-  { bg: 'bg-red-100', text: 'text-red-700' },
-  { bg: 'bg-blue-100', text: 'text-blue-700' },
-  { bg: 'bg-green-100', text: 'text-green-700' },
-  { bg: 'bg-purple-100', text: 'text-purple-700' },
-  { bg: 'bg-yellow-100', text: 'text-yellow-700' },
+  { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-400', ring: 'ring-red-400' },
+  { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-400', ring: 'ring-blue-400' },
+  { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-400', ring: 'ring-green-400' },
+  { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-400', ring: 'ring-purple-400' },
+  { bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-400', ring: 'ring-yellow-400' },
 ] as const
 
 export function getNameColors(name: string) {

@@ -124,7 +124,12 @@ export type AppointmentResponse = {
 }
 
 export type AppointmentWithPatient = Appointment & {
-  patient: PatientBase
+  patient: PatientBase & {
+    problems: Problem[]
+    allergies: Allergy[]
+    medications: Medication[]
+  }
+  vitals: Vital[]
 }
 
 export type Weekday = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY'

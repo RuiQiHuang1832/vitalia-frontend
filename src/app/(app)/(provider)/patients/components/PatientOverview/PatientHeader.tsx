@@ -1,6 +1,7 @@
 import AddAppointmentDialog from '@/app/(app)/(provider)/patients/components/AddAppointmentDialog'
 import { PatientBase, type Patient } from '@/app/(app)/(provider)/patients/types'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardAction,
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/card'
 import { Stack } from '@/components/ui/stack'
 import { calculateAge, formatDate } from '@/lib/utils'
-import { Calendar, Clock, Mail, Phone, User } from 'lucide-react'
+import { Calendar, Clock, Mail, Phone, Plus, User } from 'lucide-react'
 import { IoMdMedical } from 'react-icons/io'
 import { AvatarWithBadge } from './PatientAvatar'
 type PatientHeaderProps = {
@@ -46,7 +47,15 @@ export default function PatientHeader({ data: patient }: PatientHeaderProps) {
           </div>
         </Stack>
         <CardAction>
-          <AddAppointmentDialog patientId={patient.id} />
+          <AddAppointmentDialog
+            patientId={patient.id}
+            trigger={
+              <Button className="hover:bg-teal-700 bg-teal-600 text-white">
+                <Plus />
+                New Appointment
+              </Button>
+            }
+          />
         </CardAction>
       </CardHeader>
       <CardContent>

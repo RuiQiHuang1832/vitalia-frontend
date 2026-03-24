@@ -35,7 +35,7 @@ export default function AppointmentHeader({
       </div>
       <Stack>
         {tab === 'upcoming' && appointmentCount > 0 && (
-          <Button size="sm">
+          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
             <Play className="size-3" />
             Start Appointment
           </Button>

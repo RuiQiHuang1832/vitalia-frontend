@@ -27,6 +27,10 @@ export function calculateAge(dobIso: string): number {
   return age
 }
 
+export function formatPatientName(firstName: string, lastName: string): string {
+  return `${lastName.toUpperCase()}, ${firstName.toUpperCase()}`
+}
+
 export function formatTime(dateStr: string) {
   return new Date(dateStr).toLocaleTimeString('en-US', {
     hour: '2-digit',

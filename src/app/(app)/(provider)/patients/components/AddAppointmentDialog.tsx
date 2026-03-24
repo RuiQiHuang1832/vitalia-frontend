@@ -20,7 +20,7 @@ import { Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { useSWRConfig } from 'swr'
-import type { Weekday } from '../types'
+import type { Appointment, Weekday } from '../types'
 const WEEKDAY_MAP: Record<number, Weekday> = {
   1: 'MONDAY',
   2: 'TUESDAY',
@@ -50,18 +50,34 @@ function generateTimeSlots(startTime: string, endTime: string): string[] {
 
 type AddAppointmentDialogProps = {
   patientId: number
+  trigger?: React.ReactNode
+  appointment?: Appointment
+  onSuccess?: () => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export default function AddAppointmentDialog({ patientId }: AddAppointmentDialogProps) {
+export default function AddAppointmentDialog({
+  patientId,
+  trigger,
+  appointment,
+  onSuccess,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: AddAppointmentDialogProps) {
   const { mutate } = useSWRConfig()
   const providerId = useAuthStore((s) => s.providerId)
 
+  const isReschedule = !!appointment
+
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
-  const [reason, setReason] = useState('')
+  const [reason, setReason] = useState(isReschedule ? (appointment.reason ?? '') : '')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen ?? internalOpen
+  const setOpen = controlledOnOpenChange ?? setInternalOpen
   const { data: availability } = useProviderAvailability()
   const { data: appointments } = useProviderAppointments({
     enabled: !!availability,
@@ -83,6 +99,8 @@ export default function AddAppointmentDialog({ patientId }: AddAppointmentDialog
     const now = new Date()
     for (const apt of appointments.data) {
       if (apt.status !== 'SCHEDULED') continue
+      // When rescheduling, exclude the current appointment's slot so it shows as available
+      if (isReschedule && apt.id === appointment.id) continue
       const start = new Date(apt.startTime)
       // Ignore past appointments
       if (start < now) continue
@@ -96,7 +114,7 @@ export default function AddAppointmentDialog({ patientId }: AddAppointmentDialog
       set.add(`${dateKey}|${timeKey}`)
     }
     return set
-  }, [appointments, twoMonthsOut])
+  }, [appointments, twoMonthsOut, isReschedule, appointment?.id])
 
   const availableTimesForDate = useMemo(() => {
     if (!selectedDate || !availability) return []
@@ -124,6 +142,13 @@ export default function AddAppointmentDialog({ patientId }: AddAppointmentDialog
     }
   }, [availability, twoMonthsOut, allTimeSlots, bookedSlots])
 
+  function resetForm() {
+    setSelectedDate(undefined)
+    setSelectedTime(null)
+    setReason(isReschedule ? (appointment.reason ?? '') : '')
+    setError(null)
+  }
+
   async function handleSubmit() {
     if (!selectedDate || !selectedTime) return
     setIsLoading(true)
@@ -140,34 +165,49 @@ export default function AddAppointmentDialog({ patientId }: AddAppointmentDialog
     const formatLocal = (d: Date) =>
       `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 
-    const payload = {
-      providerId,
-      patientId,
-      startTime: formatLocal(startTime),
-      endTime: formatLocal(endTime),
-      reason: reason || 'No reason provided',
-    }
-    console.log(payload)
-    // TODO: call API to create appointment
     try {
-      const res = await fetch('/api/appointments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        throw new Error(data?.message || 'Failed to create appointment')
+      if (isReschedule) {
+        const res = await fetch(`/api/appointments/${appointment.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            startTime: formatLocal(startTime),
+            endTime: formatLocal(endTime),
+            reason: reason || appointment.reason,
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          throw new Error(data?.message || 'Failed to reschedule appointment')
+        }
+        toast.success(
+          `Appointment rescheduled to ${selectedDate.toLocaleDateString()} at ${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        )
+      } else {
+        const res = await fetch('/api/appointments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            providerId,
+            patientId,
+            startTime: formatLocal(startTime),
+            endTime: formatLocal(endTime),
+            reason: reason || 'No reason provided',
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          throw new Error(data?.message || 'Failed to create appointment')
+        }
+        toast.success(
+          `Appointment scheduled for ${selectedDate.toLocaleDateString()} at ${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+        )
       }
-      toast.success(
-        `Appointment scheduled for ${selectedDate.toLocaleDateString()} at ${startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-      )
+
       mutate(`/patients/${patientId}`)
+      onSuccess?.()
       setOpen(false)
-      setSelectedDate(undefined)
-      setSelectedTime(null)
-      setReason('')
-      setError(null)
+      resetForm()
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
       console.error(err)
@@ -178,16 +218,19 @@ export default function AddAppointmentDialog({ patientId }: AddAppointmentDialog
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="hover:bg-teal-700 bg-teal-600 text-white">
-          <Plus />
-          New Appointment
-        </Button>
-      </DialogTrigger>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v)
+        if (v) resetForm()
+      }}
+    >
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>Schedule Appointment</DialogTitle>
+          <DialogTitle>
+            {isReschedule ? 'Reschedule Appointment' : 'Schedule Appointment'}
+          </DialogTitle>
           <DialogDescription>Pick a date and available time slot.</DialogDescription>
         </DialogHeader>
 
@@ -265,7 +308,13 @@ export default function AddAppointmentDialog({ patientId }: AddAppointmentDialog
           disabled={!selectedDate || !selectedTime || isLoading}
           onClick={handleSubmit}
         >
-          {isLoading ? 'Scheduling...' : 'Confirm Appointment'}
+          {isLoading
+            ? isReschedule
+              ? 'Rescheduling...'
+              : 'Scheduling...'
+            : isReschedule
+              ? 'Confirm Reschedule'
+              : 'Confirm Appointment'}
         </Button>
       </DialogContent>
     </Dialog>

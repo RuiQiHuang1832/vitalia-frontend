@@ -2,7 +2,7 @@ import AppointmentsClient from '@/app/(app)/(provider)/appointments/components/A
 import { getProviderAppointments } from '@/lib/api.server'
 
 export default async function Appointments() {
-  const initialData = await getProviderAppointments({ page: 1, limit: 10, status: ['SCHEDULED'] })
+  const initialData = await getProviderAppointments({ page: 1, limit: 10, status: ['SCHEDULED'], fromDate: new Date().toISOString() })
 
   return (
     <div>

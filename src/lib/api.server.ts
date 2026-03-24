@@ -94,10 +94,12 @@ export async function getProviderAppointments({
   page = 1,
   limit = 10,
   status,
+  fromDate,
 }: {
   page?: number
   limit?: number
   status?: string[]
+  fromDate?: string
 }) {
   const { baseUrl, cookieHeader, decoded } = await getServerRequestContext()
 
@@ -113,6 +115,10 @@ export async function getProviderAppointments({
 
   if (status && status.length > 0) {
     status.forEach((s) => params.append('status', s))
+  }
+
+  if (fromDate) {
+    params.append('fromDate', fromDate)
   }
 
   const url = new URL(`/api/appointments/provider/${providerId}?${params.toString()}`, baseUrl)
