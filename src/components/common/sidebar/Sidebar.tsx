@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 
 import { usePathname } from 'next/navigation'
+import { Fragment } from 'react'
 
 // Map route segments to display labels
 const labelMap: Record<string, string> = {
@@ -19,6 +20,9 @@ const labelMap: Record<string, string> = {
   patients: 'Patients',
   appointments: 'Appointments',
   admin: 'Admin',
+  'audit-logs': 'Audit Logs',
+  availability: 'Availability',
+  // Add more mappings as needed
   // dynamic segments like IDs are handled below
 }
 
@@ -46,8 +50,8 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             <Breadcrumb>
               <BreadcrumbList>
                 {breadcrumbs.map((crumb, index) => (
-                  <>
-                    <BreadcrumbItem key={index} className="hidden md:block">
+                  <Fragment key={index}>
+                    <BreadcrumbItem className="hidden md:block">
                       {crumb.isLast ? (
                         <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                       ) : (
@@ -55,7 +59,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
                       )}
                     </BreadcrumbItem>
                     {!crumb.isLast && <BreadcrumbSeparator className="hidden md:block" />}
-                  </>
+                  </Fragment>
                 ))}
               </BreadcrumbList>
             </Breadcrumb>

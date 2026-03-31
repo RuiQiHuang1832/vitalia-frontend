@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import { Appointment, PatientFull } from '@/app/(app)/(provider)/patients/types'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +15,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { formatDate, formatTime } from '@/lib/utils'
+import { useClampedText } from '@/hooks/useClampedText'
+import Link from 'next/link'
 import { Calendar, ChevronDown, Clock, FileText, NotepadText } from 'lucide-react'
 
 type TabAppointmentDataProps = Pick<PatientFull, 'appointments'>
@@ -28,8 +33,11 @@ function statusVariant(status: Appointment['status']) {
 }
 
 function CurrentAppointmentCard({ appointment }: { appointment: Appointment }) {
+  const { ref: reasonRef, expanded, showToggle, toggle } = useClampedText(appointment.reason)
+
   return (
-    <Card>
+    <Link href={`/appointments?select=${appointment.id}`} className="block">
+    <Card className="transition-colors hover:border-blue-400 hover:bg-muted/50 cursor-pointer">
       <CardHeader>
         <Stack gap={0} justify="between">
           <CardTitle className="flex items-center gap-2">
@@ -45,9 +53,20 @@ function CurrentAppointmentCard({ appointment }: { appointment: Appointment }) {
       </CardHeader>
       <CardContent className="text-sm space-y-3">
         {appointment.reason && (
-          <p>
-            <span className="text-muted-foreground">Reason:</span> {appointment.reason}
-          </p>
+          <div>
+            <p ref={reasonRef} className={`wrap-break-word ${!expanded ? 'line-clamp-3' : ''}`}>
+              <span className="text-muted-foreground">Reason:</span> {appointment.reason}
+            </p>
+            {showToggle && (
+              <button
+                type="button"
+                onClick={toggle}
+                className="text-xs text-blue-600 hover:underline mt-1"
+              >
+                {expanded ? 'Show less' : 'Show more'}
+              </button>
+            )}
+          </div>
         )}
 
         {appointment.visitNote ? (
@@ -74,10 +93,14 @@ function CurrentAppointmentCard({ appointment }: { appointment: Appointment }) {
         )}
       </CardContent>
     </Card>
+    </Link>
   )
 }
 
+const INITIAL_PAST_LIMIT = 5
+
 export default function TabAppointment({ data }: { data: TabAppointmentDataProps }) {
+  const [showAllPast, setShowAllPast] = useState(false)
   const now = new Date()
   const current: Appointment[] = []
   const past: Appointment[] = []
@@ -93,6 +116,9 @@ export default function TabAppointment({ data }: { data: TabAppointmentDataProps
   // Backend returns appointments sorted by startTime desc.
   // Reverse current so upcoming shows soonest first (asc).
   current.reverse()
+
+  const visiblePast = showAllPast ? past : past.slice(0, INITIAL_PAST_LIMIT)
+  const hiddenCount = past.length - INITIAL_PAST_LIMIT
 
   return (
     <div className="space-y-6">
@@ -126,6 +152,7 @@ export default function TabAppointment({ data }: { data: TabAppointmentDataProps
           </CardTitle>
         </CardHeader>
         {past.length > 0 ? (
+          <>
           <Table>
             <TableHeader>
               <TableRow>
@@ -137,7 +164,7 @@ export default function TabAppointment({ data }: { data: TabAppointmentDataProps
               </TableRow>
             </TableHeader>
             <TableBody>
-              {past.map((appt) => (
+              {visiblePast.map((appt) => (
                 <Collapsible key={appt.id} asChild>
                   <>
                     <CollapsibleTrigger asChild>
@@ -151,7 +178,9 @@ export default function TabAppointment({ data }: { data: TabAppointmentDataProps
                         <TableCell>
                           <Badge variant={statusVariant(appt.status)}>{appt.status}</Badge>
                         </TableCell>
-                        <TableCell>{appt.reason ?? '—'}</TableCell>
+                        <TableCell className="max-w-48 truncate" title={appt.reason ?? undefined}>
+                          {appt.reason ?? '—'}
+                        </TableCell>
                         <TableCell>
                           {appt.visitNote ? (
                             <span className="flex items-center gap-1 text-xs">
@@ -197,6 +226,18 @@ export default function TabAppointment({ data }: { data: TabAppointmentDataProps
               ))}
             </TableBody>
           </Table>
+          {hiddenCount > 0 && (
+            <div className="border-t px-4 py-3 text-center">
+              <button
+                type="button"
+                onClick={() => setShowAllPast(!showAllPast)}
+                className="text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+              >
+                {showAllPast ? 'Show less' : `Show ${hiddenCount} more`}
+              </button>
+            </div>
+          )}
+          </>
         ) : (
           <CardContent className="py-6 text-center text-muted-foreground text-sm">
             No previous appointments.

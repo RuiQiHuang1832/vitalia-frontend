@@ -19,9 +19,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+import { useClampedText } from '@/hooks/useClampedText'
 import { getNameColors } from '@/lib/colorMap'
 import { formatDate, formatPatientName, formatTime } from '@/lib/utils'
-import { Calendar, CalendarClock, CheckCircle, ChevronDown, User, XCircle } from 'lucide-react'
+import {
+  Calendar,
+  CalendarClock,
+  CheckCircle,
+  ChevronDown,
+  ExternalLink,
+  User,
+  XCircle,
+} from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -39,6 +49,12 @@ export default function AppointmentDetails({
   const [completeOpen, setCompleteOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
   const [rescheduleOpen, setRescheduleOpen] = useState(false)
+  const {
+    ref: reasonRef,
+    expanded: reasonExpanded,
+    showToggle: reasonShowToggle,
+    toggle: reasonToggle,
+  } = useClampedText(appointment?.id)
 
   async function handleCompleteAppointment() {
     try {
@@ -87,7 +103,8 @@ export default function AppointmentDetails({
       <Card>
         <CardContent className="py-12">
           <p className="text-sm text-muted-foreground text-center">
-            Select an appointment to view details.
+            Select an appointment to view details, start the appointment and manage the visit note,
+            vitals, problems, medications, and allergies.
           </p>
         </CardContent>
       </Card>
@@ -190,7 +207,13 @@ export default function AppointmentDetails({
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground">Name</p>
-              <p className="font-medium">{patientName}</p>
+              <Link
+                href={`/patients/${appointment.patientId}`}
+                className="font-medium text-blue-600 hover:underline inline-flex items-center gap-1"
+              >
+                {patientName}
+                <ExternalLink className="size-3" />
+              </Link>
             </div>
             <div>
               <p className="text-muted-foreground">Date of Birth</p>
@@ -203,6 +226,10 @@ export default function AppointmentDetails({
             <div>
               <p className="text-muted-foreground">Gender</p>
               <p className="font-medium">{appointment.patient.gender}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">MRN</p>
+              <p className="font-medium">{String(appointment.patient.id).padStart(6, '0')}</p>
             </div>
           </div>
         </div>
@@ -224,9 +251,23 @@ export default function AppointmentDetails({
                 {formatTime(appointment.startTime)} – {formatTime(appointment.endTime)}
               </p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-muted-foreground">Reason</p>
-              <p className="font-medium">{appointment.reason ?? 'No reason provided'}</p>
+              <p
+                ref={reasonRef}
+                className={`font-medium wrap-break-word ${!reasonExpanded ? 'line-clamp-3' : ''}`}
+              >
+                {appointment.reason ?? 'No reason provided'}
+              </p>
+              {reasonShowToggle && (
+                <button
+                  type="button"
+                  onClick={reasonToggle}
+                  className="text-xs text-blue-600 hover:underline mt-1"
+                >
+                  {reasonExpanded ? 'Show less' : 'Show more'}
+                </button>
+              )}
             </div>
             <div>
               <p className="text-muted-foreground">Status</p>
@@ -239,11 +280,36 @@ export default function AppointmentDetails({
           </div>
         </div>
 
-        <VisitNoteSection key={`note-${appointment.id}`} appointment={appointment} readOnly={readOnly} />
-        <VitalsSection key={`vitals-${appointment.id}`} appointment={appointment} readOnly={readOnly} onMutate={onMutate} />
-        <ProblemsSection key={`problems-${appointment.id}`} appointment={appointment} readOnly={readOnly} onMutate={onMutate} />
-        <MedicationsSection key={`meds-${appointment.id}`} appointment={appointment} readOnly={readOnly} onMutate={onMutate} />
-        <AllergiesSection key={`allergies-${appointment.id}`} appointment={appointment} readOnly={readOnly} onMutate={onMutate} />
+        <VisitNoteSection
+          key={`note-${appointment.id}`}
+          appointment={appointment}
+          readOnly={readOnly}
+          onMutate={onMutate}
+        />
+        <VitalsSection
+          key={`vitals-${appointment.id}`}
+          appointment={appointment}
+          readOnly={readOnly}
+          onMutate={onMutate}
+        />
+        <ProblemsSection
+          key={`problems-${appointment.id}`}
+          appointment={appointment}
+          readOnly={readOnly}
+          onMutate={onMutate}
+        />
+        <MedicationsSection
+          key={`meds-${appointment.id}`}
+          appointment={appointment}
+          readOnly={readOnly}
+          onMutate={onMutate}
+        />
+        <AllergiesSection
+          key={`allergies-${appointment.id}`}
+          appointment={appointment}
+          readOnly={readOnly}
+          onMutate={onMutate}
+        />
       </CardContent>
     </Card>
   )

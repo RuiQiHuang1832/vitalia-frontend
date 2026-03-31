@@ -8,16 +8,22 @@ import {
 } from '@/app/(app)/(provider)/patients/types'
 import { Stack } from '@/components/ui/stack'
 import { useProviderAppointments } from '@/hooks/useProviderAppointments'
-import { useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 type Tab = 'upcoming' | 'past'
 
 export default function AppointmentsClient({ initialData }: { initialData: AppointmentResponse }) {
+  const searchParams = useSearchParams()
+  const selectId = searchParams.get('select')
+
   const [tab, setTab] = useState<Tab>('upcoming')
   const [page, setPage] = useState(1)
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithPatient | null>(
     null
   )
+  const [encounterActive, setEncounterActive] = useState(false)
+  const didAutoSelect = useRef(false)
 
   // Stable "today" value that doesn't change between renders
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
@@ -30,11 +36,30 @@ export default function AppointmentsClient({ initialData }: { initialData: Appoi
     initialData: tab === 'upcoming' && page === 1 ? initialData : undefined,
   })
 
-  const appointments = data?.data ?? []
+  const appointments = useMemo(() => data?.data ?? [], [data])
   const totalPages = data?.totalPages ?? 0
+
+  // Auto-select appointment from ?select=ID query param
+  useEffect(() => {
+    if (!selectId || didAutoSelect.current || !appointments.length) return
+    const match = appointments.find((a: AppointmentWithPatient) => a.id === Number(selectId))
+    if (match) {
+      setSelectedAppointment(match)
+      didAutoSelect.current = true
+    }
+  }, [selectId, appointments])
+
   function handleTabChange(value: string) {
     setTab(value as Tab)
     setPage(1)
+  }
+
+  function handleStartEncounter() {
+    if (selectedAppointment) setEncounterActive(true)
+  }
+
+  function handleEndEncounter() {
+    setEncounterActive(false)
   }
 
   return (
@@ -45,10 +70,18 @@ export default function AppointmentsClient({ initialData }: { initialData: Appoi
           tab={tab}
           onTabChange={handleTabChange}
           appointmentCount={appointments.length}
+          selectedAppointment={selectedAppointment}
+          encounterActive={encounterActive}
+          onStartEncounter={handleStartEncounter}
+          onEndEncounter={handleEndEncounter}
         />
       </section>
-      <Stack align="start" className="flex-nowrap" gap={6}>
-        <section className="w-1/3">
+      <Stack align="start" className="flex-nowrap" gap={encounterActive ? 0 : 6}>
+        <section
+          className={`shrink-0  transition-all duration-300 ease-in-out ${
+            encounterActive ? 'w-0 opacity-0' : 'w-1/3 opacity-100'
+          }`}
+        >
           <h2 className="sr-only">Appointments List</h2>
           <AppointmentList
             tab={tab}
@@ -64,13 +97,18 @@ export default function AppointmentsClient({ initialData }: { initialData: Appoi
           />
         </section>
         <section
-          className={`w-2/3 sticky top-5 self-start h-[95vh] flex flex-col rounded-xl ${selectedAppointment && 'border'}`}
+          className={`sticky top-5 self-start h-[95vh] flex flex-col rounded-xl transition-all duration-300 ease-in-out ${
+            encounterActive ? 'w-full' : 'w-2/3'
+          } ${selectedAppointment && 'border'}`}
         >
           <h2 className="sr-only">Appointments Details</h2>
           <AppointmentDetails
             appointment={selectedAppointment}
             onMutate={mutate}
-            onCancel={() => setSelectedAppointment(null)}
+            onCancel={() => {
+              setSelectedAppointment(null)
+              setEncounterActive(false)
+            }}
           />
         </section>
       </Stack>

@@ -120,7 +120,7 @@ export default function VitalsSection({ appointment, readOnly, onMutate }: Vital
               {saving ? 'Saving…' : <><Save className="size-3" /> Save</>}
             </Button>
           ) : (
-            <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+            <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => setEditing(true)}>
               <Pen className="size-3" />
               {vitalId ? 'Edit' : 'Record'}
             </Button>

@@ -10,9 +10,10 @@ import { toast } from 'sonner'
 interface VisitNoteSectionProps {
   appointment: AppointmentWithPatient
   readOnly: boolean
+  onMutate: () => void
 }
 
-export default function VisitNoteSection({ appointment, readOnly }: VisitNoteSectionProps) {
+export default function VisitNoteSection({ appointment, readOnly, onMutate }: VisitNoteSectionProps) {
   const existingContent = appointment.visitNote?.versions?.length
     ? appointment.visitNote.versions[appointment.visitNote.versions.length - 1].content
     : ''
@@ -53,6 +54,7 @@ export default function VisitNoteSection({ appointment, readOnly }: VisitNoteSec
 
       setSaved(true)
       toast.success('Visit note saved')
+      onMutate()
     } catch (error) {
       console.error(error)
       toast.error('Failed to save visit note')
@@ -69,7 +71,7 @@ export default function VisitNoteSection({ appointment, readOnly }: VisitNoteSec
           Visit Note (SOAP)
         </h3>
         {!readOnly && (
-          <Button size="sm" variant="outline" onClick={handleSave} disabled={saved || saving}>
+          <Button size="sm" variant="outline" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200" onClick={handleSave} disabled={saved || saving}>
             {saved ? <><Check className="size-4" /> Saved</> : 'Save Note'}
           </Button>
         )}

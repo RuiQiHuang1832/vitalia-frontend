@@ -1,5 +1,8 @@
+'use client'
+
 import { PatientFull } from '@/app/(app)/(provider)/patients/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useClampedText } from '@/hooks/useClampedText'
 
 type TabOverviewDataProps = Pick<
   PatientFull,
@@ -17,6 +20,19 @@ export default function TabOverview({ data }: { data: TabOverviewDataProps }) {
       (a, b) =>
         new Date(b.visitNote!.updatedAt).getTime() - new Date(a.visitNote!.updatedAt).getTime()
     )[0]?.visitNote
+
+  const {
+    ref: reasonRef,
+    expanded: reasonExpanded,
+    showToggle: reasonShowToggle,
+    toggle: reasonToggle,
+  } = useClampedText(nextAppointment?.id)
+  const {
+    ref: noteRef,
+    expanded: noteExpanded,
+    showToggle: noteShowToggle,
+    toggle: noteToggle,
+  } = useClampedText(latestVisitNote?.id)
 
   const latestVitals = data.vitals.sort(
     (a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime()
@@ -51,9 +67,23 @@ export default function TabOverview({ data }: { data: TabOverviewDataProps }) {
                 })}
               </p>
               {nextAppointment.reason && (
-                <p>
-                  <span className="text-muted-foreground">Reason:</span> {nextAppointment.reason}
-                </p>
+                <div>
+                  <p
+                    ref={reasonRef}
+                    className={`wrap-break-word ${!reasonExpanded ? 'line-clamp-3' : ''}`}
+                  >
+                    <span className="text-muted-foreground">Reason:</span> {nextAppointment.reason}
+                  </p>
+                  {reasonShowToggle && (
+                    <button
+                      type="button"
+                      onClick={reasonToggle}
+                      className="text-xs text-blue-600 hover:underline mt-1"
+                    >
+                      {reasonExpanded ? 'Show less' : 'Show more'}
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           ) : (
@@ -79,9 +109,23 @@ export default function TabOverview({ data }: { data: TabOverviewDataProps }) {
                 {latestVisitNote.latestVersion}
               </p>
               {latestVisitNote.versions.length > 0 && (
-                <p className="line-clamp-3">
-                  {latestVisitNote.versions.sort((a, b) => b.version - a.version)[0].content}
-                </p>
+                <div>
+                  <p
+                    ref={noteRef}
+                    className={`wrap-break-word ${!noteExpanded ? 'line-clamp-3' : ''}`}
+                  >
+                    {latestVisitNote.versions.sort((a, b) => b.version - a.version)[0].content}
+                  </p>
+                  {noteShowToggle && (
+                    <button
+                      type="button"
+                      onClick={noteToggle}
+                      className="text-xs text-blue-600 hover:underline mt-1"
+                    >
+                      {noteExpanded ? 'Show less' : 'Show more'}
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           ) : (

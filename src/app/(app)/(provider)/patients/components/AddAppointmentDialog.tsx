@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useProviderAppointments } from '@/hooks/useProviderAppointments'
 import { useProviderAvailability } from '@/hooks/useProviderAvailability'
-import { addMonths } from 'date-fns'
+import { addDays, addMonths, startOfDay } from 'date-fns'
 import { Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -85,6 +85,7 @@ export default function AddAppointmentDialog({
     limit: 200,
   })
 
+  const minDate = useMemo(() => startOfDay(addDays(new Date(), 2)), [])
   const twoMonthsOut = useMemo(() => addMonths(new Date(), 2), [])
 
   const allTimeSlots = useMemo(() => {
@@ -205,6 +206,13 @@ export default function AddAppointmentDialog({
       }
 
       mutate(`/patients/${patientId}`)
+      // Invalidate any cached appointments so the Appointments page
+      // doesn't flash stale SWR data before revalidating
+      mutate(
+        (key) => typeof key === 'string' && key.startsWith('/appointments/provider/'),
+        undefined,
+        { revalidate: false }
+      )
       onSuccess?.()
       setOpen(false)
       resetForm()
@@ -244,7 +252,7 @@ export default function AddAppointmentDialog({
                 setSelectedDate(date)
                 setSelectedTime(null)
               }}
-              disabled={[{ before: new Date() }, disabledDays]}
+              disabled={[{ before: minDate }, disabledDays]}
               startMonth={new Date()}
               endMonth={twoMonthsOut}
             />

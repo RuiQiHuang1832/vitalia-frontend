@@ -80,17 +80,25 @@ export default function AppointmentList({
                         {appt.status}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 italic line-clamp-1">
+                    <p
+                      className="text-sm text-gray-600 italic line-clamp-1"
+                      title={appt.reason ?? undefined}
+                    >
                       {appt.reason ?? 'No reason provided'}
                     </p>
-                    <div className="flex flex-col mt-1 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="size-3" />
-                        {formatDate(appt.startTime, 'full')}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="size-3" />
-                        {formatTime(appt.startTime)} – {formatTime(appt.endTime)}
+                    <div className="flex items-end justify-between mt-1">
+                      <div className="flex flex-col text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="size-3" />
+                          {formatDate(appt.startTime, 'full')}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="size-3" />
+                          {formatTime(appt.startTime)} – {formatTime(appt.endTime)}
+                        </span>
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        MRN: {String(appt.patient?.id ?? appt.patientId).padStart(6, '0')}
                       </span>
                     </div>
                   </div>

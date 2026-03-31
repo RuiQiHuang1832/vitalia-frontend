@@ -50,10 +50,12 @@ export default function ProblemsSection({ appointment, readOnly, onMutate }: Pro
   const [editIndex, setEditIndex] = useState<number | null>(null)
   const [draft, setDraft] = useState<ProblemDraft>(emptyProblem)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
 
   function openAdd() {
     setDraft(emptyProblem)
     setEditIndex(null)
+    setError('')
     setDialogOpen(true)
   }
 
@@ -61,11 +63,16 @@ export default function ProblemsSection({ appointment, readOnly, onMutate }: Pro
     const entry = problems[i]
     setDraft({ name: entry.name, icdCode: entry.icdCode, description: entry.description, status: entry.status })
     setEditIndex(i)
+    setError('')
     setDialogOpen(true)
   }
 
   async function handleSave() {
-    if (!draft.name.trim()) return
+    if (!draft.name.trim()) {
+      setError('Problem name is required.')
+      return
+    }
+    setError('')
     setSaving(true)
     try {
       if (editIndex != null) {
@@ -149,7 +156,7 @@ export default function ProblemsSection({ appointment, readOnly, onMutate }: Pro
           Problems
         </h3>
         {!readOnly && (
-          <Button variant="ghost" size="sm" onClick={openAdd}>
+          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={openAdd}>
             <Plus className="size-3" /> Add
           </Button>
         )}
@@ -177,7 +184,7 @@ export default function ProblemsSection({ appointment, readOnly, onMutate }: Pro
                 {p.status}
               </Badge>
               {!readOnly && (
-                <Button variant="ghost" size="sm" onClick={() => openEdit(i)}>
+                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => openEdit(i)}>
                   <Pen className="size-3" />
                 </Button>
               )}
@@ -192,28 +199,28 @@ export default function ProblemsSection({ appointment, readOnly, onMutate }: Pro
             <DialogTitle>{editIndex != null ? 'Edit Problem' : 'Add Problem'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <div>
+            <div className="space-y-1.5">
               <Label>Name</Label>
               <Input
                 value={draft.name}
                 onChange={(e) => setDraft({ ...draft, name: e.target.value })}
               />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label>ICD Code</Label>
               <Input
                 value={draft.icdCode ?? ''}
                 onChange={(e) => setDraft({ ...draft, icdCode: e.target.value })}
               />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label>Description</Label>
               <Textarea
                 value={draft.description ?? ''}
                 onChange={(e) => setDraft({ ...draft, description: e.target.value })}
               />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label>Status</Label>
               <Select
                 value={draft.status}
@@ -229,6 +236,7 @@ export default function ProblemsSection({ appointment, readOnly, onMutate }: Pro
               </Select>
             </div>
           </div>
+          {error && <p className="text-sm text-red-500">{error}</p>}
           <DialogFooter>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? 'Saving…' : 'Save'}

@@ -68,10 +68,12 @@ export default function AllergiesSection({ appointment, readOnly, onMutate }: Al
   const [editIndex, setEditIndex] = useState<number | null>(null)
   const [draft, setDraft] = useState<AllergyDraft>(emptyAllergy)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
 
   function openAdd() {
     setDraft(emptyAllergy)
     setEditIndex(null)
+    setError('')
     setDialogOpen(true)
   }
 
@@ -79,11 +81,16 @@ export default function AllergiesSection({ appointment, readOnly, onMutate }: Al
     const entry = allergies[i]
     setDraft({ name: entry.name, category: entry.category, substance: entry.substance, reaction: entry.reaction, severity: entry.severity, notes: entry.notes })
     setEditIndex(i)
+    setError('')
     setDialogOpen(true)
   }
 
   async function handleSave() {
-    if (!draft.substance.trim()) return
+    if (!draft.substance.trim()) {
+      setError('Substance is required.')
+      return
+    }
+    setError('')
     setSaving(true)
     try {
       if (editIndex != null) {
@@ -136,7 +143,7 @@ export default function AllergiesSection({ appointment, readOnly, onMutate }: Al
           Allergies
         </h3>
         {!readOnly && (
-          <Button variant="ghost" size="sm" onClick={openAdd}>
+          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={openAdd}>
             <Plus className="size-3" /> Add
           </Button>
         )}
@@ -161,7 +168,7 @@ export default function AllergiesSection({ appointment, readOnly, onMutate }: Al
                 <Badge variant={severityColor[a.severity] ?? 'secondary'}>{a.severity}</Badge>
               )}
               {!readOnly && (
-                <Button variant="ghost" size="sm" onClick={() => openEdit(i)}>
+                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => openEdit(i)}>
                   <Pen className="size-3" />
                 </Button>
               )}
@@ -176,21 +183,21 @@ export default function AllergiesSection({ appointment, readOnly, onMutate }: Al
             <DialogTitle>{editIndex != null ? 'Edit Allergy' : 'Add Allergy'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <div>
+            <div className="space-y-1.5">
               <Label>Substance</Label>
               <Input
                 value={draft.substance}
                 onChange={(e) => setDraft({ ...draft, substance: e.target.value })}
               />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label>Name</Label>
               <Input
                 value={draft.name}
                 onChange={(e) => setDraft({ ...draft, name: e.target.value })}
               />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label>Category</Label>
               <Select
                 value={draft.category}
@@ -207,14 +214,14 @@ export default function AllergiesSection({ appointment, readOnly, onMutate }: Al
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label>Reaction</Label>
               <Input
                 value={draft.reaction ?? ''}
                 onChange={(e) => setDraft({ ...draft, reaction: e.target.value || null })}
               />
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label>Severity</Label>
               <Select
                 value={draft.severity ?? ''}
@@ -230,7 +237,7 @@ export default function AllergiesSection({ appointment, readOnly, onMutate }: Al
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label>Notes</Label>
               <Textarea
                 value={draft.notes ?? ''}
@@ -238,6 +245,7 @@ export default function AllergiesSection({ appointment, readOnly, onMutate }: Al
               />
             </div>
           </div>
+          {error && <p className="text-sm text-red-500">{error}</p>}
           <DialogFooter>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? 'Saving…' : 'Save'}

@@ -5,7 +5,7 @@ import { usePatientOverview } from '@/hooks/usePatientOverview'
 import { type PatientOverview } from '../types'
 
 export default function PatientOverview({ id, data: fallback }: PatientOverview) {
-  const { data: patient, mutate } = usePatientOverview(id, fallback)
+  const { data: patient } = usePatientOverview(id, fallback)
 
   if (!patient) return null
   return (

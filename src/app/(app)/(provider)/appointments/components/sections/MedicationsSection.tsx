@@ -70,10 +70,12 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
   const [editIndex, setEditIndex] = useState<number | null>(null)
   const [draft, setDraft] = useState<MedicationDraft>(emptyMedication)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
 
   function openAdd() {
     setDraft(emptyMedication)
     setEditIndex(null)
+    setError('')
     setDialogOpen(true)
   }
 
@@ -81,11 +83,16 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
     const entry = meds[i]
     setDraft({ name: entry.name, dosage: entry.dosage, frequency: entry.frequency, startDate: entry.startDate, endDate: entry.endDate, status: entry.status, notes: entry.notes })
     setEditIndex(i)
+    setError('')
     setDialogOpen(true)
   }
 
   async function handleSave() {
-    if (!draft.name.trim()) return
+    if (!draft.name.trim()) {
+      setError('Medication name is required.')
+      return
+    }
+    setError('')
     setSaving(true)
     try {
       if (editIndex != null) {
@@ -171,7 +178,7 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
           Medications
         </h3>
         {!readOnly && (
-          <Button variant="ghost" size="sm" onClick={openAdd}>
+          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={openAdd}>
             <Plus className="size-3" /> Add
           </Button>
         )}
@@ -199,7 +206,7 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
                 {m.status}
               </Badge>
               {!readOnly && (
-                <Button variant="ghost" size="sm" onClick={() => openEdit(i)}>
+                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => openEdit(i)}>
                   <Pen className="size-3" />
                 </Button>
               )}
@@ -214,7 +221,7 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
             <DialogTitle>{editIndex != null ? 'Edit Medication' : 'Add Medication'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <div>
+            <div className="space-y-1.5">
               <Label>Name</Label>
               <Input
                 value={draft.name}
@@ -222,7 +229,7 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
+              <div className="space-y-1.5">
                 <Label>Dosage</Label>
                 <Input
                   value={draft.dosage}
@@ -230,7 +237,7 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
                   placeholder="e.g. 500mg"
                 />
               </div>
-              <div>
+              <div className="space-y-1.5">
                 <Label>Frequency</Label>
                 <Input
                   value={draft.frequency}
@@ -240,7 +247,7 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
+              <div className="space-y-1.5">
                 <Label>Start Date</Label>
                 <Input
                   type="date"
@@ -248,7 +255,7 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
                   onChange={(e) => setDraft({ ...draft, startDate: e.target.value })}
                 />
               </div>
-              <div>
+              <div className="space-y-1.5">
                 <Label>End Date</Label>
                 <Input
                   type="date"
@@ -257,7 +264,7 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
                 />
               </div>
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label>Status</Label>
               <Select
                 value={draft.status}
@@ -273,7 +280,7 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="space-y-1.5">
               <Label>Notes</Label>
               <Textarea
                 value={draft.notes ?? ''}
@@ -281,6 +288,7 @@ export default function MedicationsSection({ appointment, readOnly, onMutate }: 
               />
             </div>
           </div>
+          {error && <p className="text-sm text-red-500">{error}</p>}
           <DialogFooter>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? 'Saving…' : 'Save'}

@@ -55,12 +55,12 @@ const providerNavigation = {
   navList: [
     {
       name: 'Audit Logs',
-      url: '#',
+      url: '/audit-logs',
       icon: ClipboardList,
     },
     {
       name: 'Availability',
-      url: '#',
+      url: '/availability',
       icon: Clock,
     },
   ],

@@ -28,8 +28,10 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${GeistSans.variable} ${GeistSans.className}`}
     >
-      <body className="antialiased ">{children}</body>
-      <Toaster richColors position="bottom-left" />
+      <body className="antialiased ">
+        {children}
+        <Toaster richColors position="bottom-left" />
+      </body>
     </html>
   )
 }
