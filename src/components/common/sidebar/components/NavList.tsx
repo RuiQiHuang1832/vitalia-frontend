@@ -1,6 +1,7 @@
 'use client'
 
 import { ExternalLink, Eye, KeyRound, MoreHorizontal, type LucideIcon } from 'lucide-react'
+import Link from 'next/link'
 
 import {
   DropdownMenu,
@@ -39,10 +40,10 @@ export function NavList({
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
+              <Link href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
             {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
