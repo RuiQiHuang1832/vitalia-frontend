@@ -4,16 +4,18 @@ import AvailabilityForm from '@/app/(app)/(provider)/availability/components/Ava
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useAuthStore } from '@/app/(auth)/stores/auth.store'
 import { useProviderAvailability } from '@/hooks/useProviderAvailability'
 import { CalendarPlus, Clock } from 'lucide-react'
 import { useState } from 'react'
 
 export default function AvailabilityPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const providerId = useAuthStore((s) => s.providerId)
 
-  const { data: availability, isLoading } = useProviderAvailability()
+  const { data: availability, isLoading, mutate } = useProviderAvailability()
 
-  if (isLoading) {
+  if (!providerId || isLoading) {
     return (
       <div className="py-5 space-y-4">
         <Skeleton className="h-8 w-48" />
@@ -30,9 +32,9 @@ export default function AvailabilityPage() {
       </section>
       <div className="py-5 flex-1">
         {availability ? (
-          <AvailabilityForm availability={availability} mode="edit" />
+          <AvailabilityForm availability={availability} mode="edit" onSaved={(data) => mutate(data, { revalidate: false })} />
         ) : showCreateForm ? (
-          <AvailabilityForm mode="create" />
+          <AvailabilityForm mode="create" onSaved={(data) => mutate(data, { revalidate: false })} />
         ) : (
           <Card className="h-full border-none bg-transparent shadow-none">
             <CardHeader className="text-center">

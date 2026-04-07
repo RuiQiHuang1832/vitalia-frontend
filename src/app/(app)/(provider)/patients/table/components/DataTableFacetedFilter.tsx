@@ -6,7 +6,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Separator } from '@/components/ui/separator'
 import { Stack } from '@/components/ui/stack'
 import { Column } from '@tanstack/react-table'
-import { FaCircle } from "react-icons/fa";
 import { LuCirclePlus } from 'react-icons/lu'
 
 export function DataTableFacetedFilter<TData>({
@@ -16,7 +15,7 @@ export function DataTableFacetedFilter<TData>({
 }: {
   column: Column<TData, unknown>
   title: string
-  options: { label: string; value: string; color: string }[]
+  options: { label: string; value: string; dot: string; border: string }[]
 }) {
   const selectedValues = new Set(column.getFilterValue() as string[])
 
@@ -66,7 +65,10 @@ export function DataTableFacetedFilter<TData>({
                     />
                   }
                   <Stack className="w-full">
-                    <Badge className={option?.color}>{option?.label}</Badge>
+                    <Badge variant="outline" className={option.border}>
+                      <span className={`size-2 rounded-full ${option.dot}`} />
+                      {option.label}
+                    </Badge>
                   </Stack>
                 </CommandItem>
               )

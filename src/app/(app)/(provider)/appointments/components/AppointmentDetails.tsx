@@ -9,6 +9,7 @@ import VisitNoteSection from '@/app/(app)/(provider)/appointments/components/sec
 import VitalsSection from '@/app/(app)/(provider)/appointments/components/sections/VitalsSection'
 import AddAppointmentDialog from '@/app/(app)/(provider)/patients/components/AddAppointmentDialog'
 import { type AppointmentWithPatient } from '@/app/(app)/(provider)/patients/types'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -20,8 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 import { useClampedText } from '@/hooks/useClampedText'
-import { getNameColors } from '@/lib/colorMap'
-import { formatDate, formatPatientName, formatTime } from '@/lib/utils'
+import { formatDate, formatTime, getPatientDisplay } from '@/lib/utils'
 import {
   Calendar,
   CalendarClock,
@@ -111,22 +111,19 @@ export default function AppointmentDetails({
     )
   }
 
-  const patientName = appointment.patient
-    ? formatPatientName(appointment.patient.firstName, appointment.patient.lastName)
-    : `Patient #${appointment.patientId}`
+  const { name: patientName } = getPatientDisplay(appointment.patient, appointment.patientId)
 
   const readOnly = appointment.status !== 'SCHEDULED'
-  const { bg, border } = getNameColors(patientName)
 
-  const statusStyles: Record<string, string> = {
-    SCHEDULED: 'bg-blue-100 text-blue-700 border border-blue-300',
-    COMPLETED: 'bg-emerald-100 text-emerald-700 border border-emerald-300',
-    CANCELLED: 'bg-red-100 text-red-700 border border-red-300',
+  const statusVariantMap: Record<string, 'default' | 'secondary' | 'outline'> = {
+    SCHEDULED: 'default',
+    COMPLETED: 'secondary',
+    CANCELLED: 'outline',
   }
 
   return (
     <Card className="border-0 pt-0 gap-0 h-full flex flex-col shadow-md bg-slate-50/60">
-      <CardHeader className={` rounded-t-xl border-b-2 ${border} p-5 shrink-0`}>
+      <CardHeader className="rounded-t-xl border-b p-5 shrink-0">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-xl">{patientName}</CardTitle>
@@ -271,11 +268,9 @@ export default function AppointmentDetails({
             </div>
             <div>
               <p className="text-muted-foreground">Status</p>
-              <span
-                className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full mt-0.5 ${statusStyles[appointment.status]}`}
-              >
+              <Badge variant={statusVariantMap[appointment.status]} className="mt-0.5">
                 {appointment.status}
-              </span>
+              </Badge>
             </div>
           </div>
         </div>

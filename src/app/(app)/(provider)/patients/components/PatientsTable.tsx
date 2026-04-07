@@ -1,4 +1,5 @@
 'use client'
+import { formatMrn } from '@/lib/utils'
 import { usePatients } from '@/hooks/usePatients'
 import { ColumnFiltersState, SortingState } from '@tanstack/react-table'
 import { useEffect, useMemo, useState } from 'react'
@@ -39,8 +40,8 @@ export default function PatientsTable({ initialData }: { initialData: PatientsRe
   const tableData: Patient[] = useMemo(() => {
     const rows = payload?.data ?? []
     return rows.map((p) => ({
-      mrn: `MRN-${String(p.id).padStart(6, '0')}`,
-      name: `${p.firstName.charAt(0).toUpperCase() + p.firstName.slice(1)} ${p.lastName.charAt(0).toUpperCase() + p.lastName.slice(1)}`,
+      mrn: formatMrn(p.id),
+      name: `${p.lastName.toUpperCase()}, ${p.firstName.toUpperCase()}`,
       age: new Date(p.dob),
       lastVisit: p.appointments[0]?.startTime ?? null,
       status: p.status,

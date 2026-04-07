@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Stack } from '@/components/ui/stack'
-import { calculateAge, formatDate } from '@/lib/utils'
+import { calculateAge, formatDate, formatMrn } from '@/lib/utils'
 import { Calendar, Clock, Mail, Phone, Plus, User } from 'lucide-react'
 import { IoMdMedical } from 'react-icons/io'
 import { AvatarWithBadge } from './PatientAvatar'
@@ -64,7 +64,7 @@ export default function PatientHeader({ data: patient }: PatientHeaderProps) {
             <IoMdMedical className="size-4 text-muted-foreground" />
             <div>
               <p className="text-xs text-muted-foreground">MRN</p>
-              <p className="text-sm font-medium">MRN-{patient.id.toString().padStart(6, '0')}</p>
+              <p className="text-sm font-medium">{formatMrn(patient.id)}</p>
             </div>
           </Stack>
           <Stack gap={2} align="center">

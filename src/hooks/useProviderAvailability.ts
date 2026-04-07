@@ -6,5 +6,8 @@ import useSWR from 'swr'
 export function useProviderAvailability() {
   const providerId = useAuthStore((s) => s.providerId)
 
-  return useSWR<ProviderAvailability>(`/availability/${providerId}`, swrFetcher)
+  return useSWR<ProviderAvailability>(providerId ? `/availability/${providerId}` : null, swrFetcher, {
+    shouldRetryOnError: false,
+    revalidateOnFocus: false,
+  })
 }

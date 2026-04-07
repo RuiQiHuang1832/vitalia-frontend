@@ -7,8 +7,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
-import { getNameColors } from '@/lib/colorMap'
-import { formatDate, formatPatientName, formatTime } from '@/lib/utils'
+import { formatDate, formatTime, getPatientDisplay } from '@/lib/utils'
 import { Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 
 const statusStyles: Record<Appointment['status'], string> = {
@@ -58,10 +57,7 @@ export default function AppointmentList({
 
       <div className="space-y-3">
         {appointments.map((appt) => {
-          const patientName = appt.patient
-            ? formatPatientName(appt.patient.firstName, appt.patient.lastName)
-            : `Patient #${appt.patientId}`
-          const { bg, border, ring } = getNameColors(patientName)
+          const { name: patientName, mrn: patientMrn, colors: { bg, border, ring } } = getPatientDisplay(appt.patient, appt.patientId)
 
           return (
             <Card
@@ -98,7 +94,7 @@ export default function AppointmentList({
                         </span>
                       </div>
                       <span className="text-xs text-gray-500">
-                        MRN: {String(appt.patient?.id ?? appt.patientId).padStart(6, '0')}
+                        {patientMrn}
                       </span>
                     </div>
                   </div>

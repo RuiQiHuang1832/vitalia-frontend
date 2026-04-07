@@ -25,8 +25,7 @@ export function NavUser() {
   const { isMobile } = useSidebar()
   const { greeting, fullName, displayName, avatar, email, specialty, isLoading } =
     useCurrentUserDisplay()
-  const { bg, text } = getNameColors(fullName || 'User')
-
+  const { bg } = getNameColors(fullName)
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -43,7 +42,7 @@ export function NavUser() {
               ) : (
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={avatar} alt={fullName} />
-                  <AvatarFallback className={`rounded-lg ${bg} ${text}`}>
+                  <AvatarFallback className={`rounded-lg ${bg}`}>
                     {capitalize(fullName.charAt(0))}
                   </AvatarFallback>
                 </Avatar>
@@ -72,7 +71,7 @@ export function NavUser() {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={avatar} alt={fullName} />
-                  <AvatarFallback className="rounded-lg">
+                  <AvatarFallback className={`rounded-lg ${bg}`}>
                     {capitalize(fullName.charAt(0))}
                   </AvatarFallback>
                 </Avatar>

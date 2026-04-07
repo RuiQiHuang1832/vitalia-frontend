@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from 'clsx'
+import { getNameColors } from '@/lib/colorMap'
 import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
@@ -25,6 +26,14 @@ export function calculateAge(dobIso: string): number {
   }
 
   return age
+}
+
+export function getTimeGreeting(now: Date) {
+  return now.getHours() < 12 ? 'Good morning' : 'Good afternoon'
+}
+
+export function formatMrn(id: number): string {
+  return `MRN-${String(id).padStart(6, '0')}`
 }
 
 export function formatPatientName(firstName: string, lastName: string): string {
@@ -68,4 +77,22 @@ export function formatDate(dateStr: string | null, style: DateFormatStyle = 'dat
     default:
       return date.toLocaleDateString()
   }
+}
+
+export function getPatientDisplay(
+  patient: { firstName: string; lastName: string; dob: string; gender: string; id: number } | null | undefined,
+  fallbackId: number
+) {
+  const name = patient
+    ? formatPatientName(patient.firstName, patient.lastName)
+    : `Patient #${fallbackId}`
+  const initials = patient
+    ? `${patient.firstName.charAt(0)}${patient.lastName.charAt(0)}`
+    : '?'
+  const age = patient ? calculateAge(patient.dob) : null
+  const gender = patient ? patient.gender : null
+  const mrn = formatMrn(patient?.id ?? fallbackId)
+  const colors = getNameColors(name)
+
+  return { name, initials, age, gender, mrn, colors }
 }

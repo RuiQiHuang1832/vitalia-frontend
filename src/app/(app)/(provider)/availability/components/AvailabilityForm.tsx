@@ -44,9 +44,10 @@ const TIME_OPTIONS = generateTimeOptions()
 type AvailabilityFormProps = {
   availability?: ProviderAvailability
   mode: 'create' | 'edit'
+  onSaved?: (data: ProviderAvailability) => void
 }
 
-export default function AvailabilityForm({ availability, mode }: AvailabilityFormProps) {
+export default function AvailabilityForm({ availability, mode, onSaved }: AvailabilityFormProps) {
   const [workingDays, setWorkingDays] = useState<Weekday[]>(availability?.workingDays ?? [])
   const [startTime, setStartTime] = useState(availability?.startTime ?? '09:00')
   const [endTime, setEndTime] = useState(availability?.endTime ?? '17:00')
@@ -71,16 +72,40 @@ export default function AvailabilityForm({ availability, mode }: AvailabilityFor
     }
 
     setSaving(true)
-
-    // TODO: Wire up API calls
-    // mode === 'create' → POST /api/availability
-    // mode === 'edit'   → PUT  /api/availability/:id
-    console.log('Submit availability:', { workingDays, startTime, endTime, mode })
-
-    // Simulate save
-    await new Promise((r) => setTimeout(r, 500))
-    toast.success(mode === 'create' ? 'Availability created.' : 'Availability updated.')
-    setSaving(false)
+    try {
+      if (mode === 'create') {
+        const res = await fetch('/api/availability', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workingDays, startTime, endTime }),
+          credentials: 'include',
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to create availability.')
+        }
+        toast.success('Availability created.')
+        onSaved?.(data)
+      } else if (mode === 'edit' && availability) {
+        const res = await fetch(`/api/availability/${availability.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workingDays, startTime, endTime }),
+          credentials: 'include',
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to update availability.')
+        }
+        toast.success('Availability updated.')
+        onSaved?.(data)
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Something went wrong'
+      toast.error(errorMessage)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (

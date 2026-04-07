@@ -38,10 +38,10 @@ import { toast } from 'sonner'
 import { useSWRConfig } from 'swr'
 import type { Patient } from '../types'
 import Link from 'next/link'
-const statusOptions: Array<{ value: Patient['status']; label: string; color: string }> = [
-  { value: 'ACTIVE', label: 'Active', color: 'bg-green-50 text-green-700' },
-  { value: 'INACTIVE', label: 'Inactive', color: 'bg-gray-50 text-gray-700' },
-  { value: 'DISCHARGED', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
+const statusOptions: Array<{ value: Patient['status']; label: string }> = [
+  { value: 'ACTIVE', label: 'Active' },
+  { value: 'INACTIVE', label: 'Inactive' },
+  { value: 'DISCHARGED', label: 'Discharged' },
 ]
 
 function ActionsCell({ row }: { row: Row<Patient> }) {
@@ -177,13 +177,13 @@ export const columns: ColumnDef<Patient>[] = [
     size: 200,
     cell: ({ row, getValue }) => {
       const fullName = getValue() as string
-      const { bg, text } = getNameColors(fullName || 'User')
       const patientId = Number.parseInt(row.original.mrn.replace(/^MRN-/, ''), 10)
+      const { bg, border, ring } = getNameColors(fullName)
       return (
         <Link href={`/patients/${patientId}`} className="group">
           <Stack>
             <div
-              className={`flex h-9 w-9 items-center justify-center rounded-full ${bg} ${text} text-sm font-medium`}
+              className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium ${bg} ${border} ${ring}`}
             >
               {fullName
                 .split(' ')
@@ -303,13 +303,18 @@ export const columns: ColumnDef<Patient>[] = [
     size: 150,
     cell: ({ getValue }) => {
       const status = getValue() as Patient['status']
-      const statusOptions: Array<{ value: Patient['status']; label: string; color: string }> = [
-        { value: 'ACTIVE', label: 'Active', color: 'bg-green-50 text-green-700' },
-        { value: 'INACTIVE', label: 'Inactive', color: 'bg-amber-50 text-amber-700' },
-        { value: 'DISCHARGED', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
-      ]
-      const option = statusOptions.find((option) => option.value === status)
-      return <Badge className={option?.color}>{option?.label}</Badge>
+      const statusConfig: Record<Patient['status'], { dot: string; border: string; label: string }> = {
+        ACTIVE: { dot: 'bg-green-500', border: 'border-green-300', label: 'Active' },
+        INACTIVE: { dot: 'bg-gray-400', border: 'border-gray-300', label: 'Inactive' },
+        DISCHARGED: { dot: 'bg-blue-500', border: 'border-blue-300', label: 'Discharged' },
+      }
+      const config = statusConfig[status]
+      return (
+        <Badge variant="outline" className={config.border}>
+          <span className={`size-2 rounded-full ${config.dot}`} />
+          {config.label}
+        </Badge>
+      )
     },
     filterFn: (row, columnId, filterValue) => {
       const value = row.getValue(columnId)

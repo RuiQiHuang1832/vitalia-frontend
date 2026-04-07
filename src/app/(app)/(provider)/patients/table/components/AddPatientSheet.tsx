@@ -84,7 +84,7 @@ export function AddPatientSheet() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button>
+        <Button className="bg-emerald-600 hover:bg-emerald-700">
           <IoMdAdd className="!text-white h-4 w-4" />
           Add New Patient
         </Button>
@@ -238,7 +238,7 @@ export function AddPatientSheet() {
               type="submit"
               form="create-patient-form"
               disabled={form.formState.isSubmitting}
-              className={cn(form.formState.isSubmitting && 'bg-gray-400')}
+              className={cn('bg-emerald-600 hover:bg-emerald-700', form.formState.isSubmitting && 'bg-gray-400')}
             >
               {form.formState.isSubmitting ? (
                 <ImSpinner2 className="animate-spin" />

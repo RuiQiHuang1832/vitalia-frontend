@@ -132,9 +132,9 @@ export function DataTable<TData, TValue>({
             column={statusColumn}
             title="Status"
             options={[
-              { value: 'ACTIVE', label: 'Active', color: 'bg-green-50 text-green-700' },
-              { value: 'INACTIVE', label: 'Inactive', color: 'bg-amber-50 text-amber-700' },
-              { value: 'DISCHARGED', label: 'Discharged', color: 'bg-blue-50 text-blue-700' },
+              { value: 'ACTIVE', label: 'Active', dot: 'bg-green-500', border: 'border-green-300' },
+              { value: 'INACTIVE', label: 'Inactive', dot: 'bg-gray-400', border: 'border-gray-300' },
+              { value: 'DISCHARGED', label: 'Discharged', dot: 'bg-blue-500', border: 'border-blue-300' },
             ]}
           />
         )}
