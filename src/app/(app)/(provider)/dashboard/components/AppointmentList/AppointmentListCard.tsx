@@ -5,7 +5,7 @@ import { type AppointmentWithPatient } from '@/app/(app)/(provider)/patients/typ
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useProviderAppointments } from '@/hooks/useProviderAppointments'
-import { formatTime, getPatientDisplay } from '@/lib/utils'
+import { capitalize, formatTime, getPatientDisplay } from '@/lib/utils'
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo } from 'react'
@@ -65,12 +65,14 @@ export default function AppointmentListCard() {
 
                 {/* Name + Meta */}
                 <div className="min-w-0">
-                  <div className="font-medium truncate">{patientName}</div>
+                  <div className="flex items-baseline gap-2 truncate">
+                    <span className="font-medium">{patientName}</span>
+                    <span className="text-xs text-muted-foreground/60">{mrn}</span>
+                  </div>
                   <div className="text-sm text-muted-foreground truncate">
                     {[
                       age != null && `${age} y/o`,
-                      gender,
-                      mrn,
+                      gender && capitalize(gender.toLowerCase()),
                     ]
                       .filter(Boolean)
                       .join(' · ')}
