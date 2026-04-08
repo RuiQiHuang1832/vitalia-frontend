@@ -31,6 +31,8 @@ function redirectLoggedInFromLogin(req: NextRequest, role: Role) {
 }
 
 
+const providerRoutes = ['/dashboard', '/appointments', '/patients', '/availability', '/audit-logs', '/account']
+
 function enforceRoleRoutes(req: NextRequest, role: Role) {
   const { pathname } = req.nextUrl
 
@@ -38,7 +40,7 @@ function enforceRoleRoutes(req: NextRequest, role: Role) {
     return NextResponse.redirect(new URL('/unauthorized', req.url))
   }
 
-  if (pathname.startsWith('/dashboard') && role !== 'PROVIDER') {
+  if (providerRoutes.some(r => pathname.startsWith(r)) && role !== 'PROVIDER') {
     return NextResponse.redirect(new URL('/unauthorized', req.url))
   }
 
@@ -63,5 +65,15 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/login', '/dashboard/:path*', '/portal/:path*', '/admin/:path*'],
+  matcher: [
+    '/login',
+    '/dashboard/:path*',
+    '/appointments/:path*',
+    '/patients/:path*',
+    '/availability/:path*',
+    '/audit-logs/:path*',
+    '/account/:path*',
+    '/portal/:path*',
+    '/admin/:path*',
+  ],
 }

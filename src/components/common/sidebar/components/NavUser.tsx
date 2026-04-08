@@ -20,7 +20,8 @@ import { useCurrentUserDisplay } from '@/hooks/useCurrentUserDisplay'
 import { logout } from '@/lib/auth'
 import { getNameColors } from '@/lib/colorMap'
 import { capitalize } from '@/lib/utils'
-import { BadgeCheck, Bell, ChevronsUpDown, LogOut, Wrench } from 'lucide-react'
+import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react'
+import Link from 'next/link'
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { greeting, fullName, displayName, avatar, email, specialty, isLoading } =
@@ -83,17 +84,11 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Wrench />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
+              <DropdownMenuItem asChild>
+                <Link href="/account">
+                  <BadgeCheck />
+                  Account
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

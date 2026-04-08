@@ -13,6 +13,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 
 import { usePathname } from 'next/navigation'
 import { Fragment } from 'react'
+import { capitalize } from '../../../lib/utils'
 
 // Map route segments to display labels
 const labelMap: Record<string, string> = {
@@ -49,18 +50,21 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
             <Breadcrumb>
               <BreadcrumbList>
-                {breadcrumbs.map((crumb, index) => (
-                  <Fragment key={index}>
-                    <BreadcrumbItem className="hidden md:block">
-                      {crumb.isLast ? (
-                        <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                      ) : (
-                        <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
-                      )}
-                    </BreadcrumbItem>
-                    {!crumb.isLast && <BreadcrumbSeparator className="hidden md:block" />}
-                  </Fragment>
-                ))}
+                {breadcrumbs.map((crumb, index) => {
+                  const label = capitalize(crumb.label)
+                  return (
+                    <Fragment key={index}>
+                      <BreadcrumbItem className="hidden md:block">
+                        {crumb.isLast ? (
+                          <BreadcrumbPage>{label}</BreadcrumbPage>
+                        ) : (
+                          <BreadcrumbLink href={crumb.href}>{label}</BreadcrumbLink>
+                        )}
+                      </BreadcrumbItem>
+                      {!crumb.isLast && <BreadcrumbSeparator className="hidden md:block" />}
+                    </Fragment>
+                  )
+                })}
               </BreadcrumbList>
             </Breadcrumb>
           </div>
