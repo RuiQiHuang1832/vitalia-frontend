@@ -95,11 +95,15 @@ export async function getProviderAppointments({
   limit = 10,
   status,
   fromDate,
+  endTimeAfter,
+  endTimeBefore,
 }: {
   page?: number
   limit?: number
   status?: string[]
   fromDate?: string
+  endTimeAfter?: string
+  endTimeBefore?: string
 }) {
   const { baseUrl, cookieHeader, decoded } = await getServerRequestContext()
 
@@ -119,6 +123,14 @@ export async function getProviderAppointments({
 
   if (fromDate) {
     params.append('fromDate', fromDate)
+  }
+
+  if (endTimeAfter) {
+    params.append('endTimeAfter', endTimeAfter)
+  }
+
+  if (endTimeBefore) {
+    params.append('endTimeBefore', endTimeBefore)
   }
 
   const url = new URL(`/api/appointments/provider/${providerId}?${params.toString()}`, baseUrl)

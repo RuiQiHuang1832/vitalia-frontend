@@ -44,6 +44,7 @@ export default function AppointmentHeader({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="upcoming">Upcoming</SelectItem>
+              <SelectItem value="overdue">Overdue</SelectItem>
               <SelectItem value="past">Past Appointments</SelectItem>
             </SelectContent>
           </Select>

@@ -4,10 +4,21 @@ import ClinicalPreviewCard from '@/app/(app)/(provider)/dashboard/components/Cli
 import NextAppointmentCard from '@/app/(app)/(provider)/dashboard/components/NextAppointment/NextAppointmentCard'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCurrentUserDisplay } from '@/hooks/useCurrentUserDisplay'
+import { useProviderAppointmentCount } from '@/hooks/useProviderAppointmentCount'
 import { getTimeGreeting } from '@/lib/utils'
+import { AlertTriangle, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
+import { useMemo } from 'react'
 export default function Dashboard() {
   const { greeting, isLoading } = useCurrentUserDisplay()
   const timeGreeting = getTimeGreeting(new Date())
+
+  const now = useMemo(() => new Date().toISOString(), [])
+  const { data: overdue } = useProviderAppointmentCount({
+    status: ['SCHEDULED'],
+    endTimeBefore: now,
+  })
+  const overdueCount = overdue?.count ?? 0
 
   return (
     <div className="space-y-8">
@@ -24,6 +35,26 @@ export default function Dashboard() {
           . Here&apos;s an overview of your day:
         </p>
       </section>
+
+      {overdueCount > 0 && (
+        <Link
+          href="/appointments?tab=overdue"
+          className="flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900 hover:bg-amber-100 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="size-5 shrink-0 text-amber-600" />
+            <p className="text-sm">
+              You have{' '}
+              <span className="font-semibold">
+                {overdueCount} overdue appointment{overdueCount === 1 ? '' : 's'}
+              </span>
+              . Please review them. Overdue appointments will be automatically marked as cancelled
+              after <span className="font-semibold">24 hours.</span>
+            </p>
+          </div>
+          <ChevronRight className="size-4 text-amber-700" />
+        </Link>
+      )}
 
       {/* Dashboard Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">

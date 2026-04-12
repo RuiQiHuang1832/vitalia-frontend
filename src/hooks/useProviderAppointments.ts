@@ -9,10 +9,12 @@ export type ProviderAppointmentsResponse = {
   limit?: number
   status?: Appointment['status'][]
   fromDate?: string
+  endTimeAfter?: string
+  endTimeBefore?: string
   initialData?: AppointmentResponse
 }
 
-export function useProviderAppointments({enabled = true, page = 1, limit = 10, status, fromDate, initialData}: ProviderAppointmentsResponse) {
+export function useProviderAppointments({enabled = true, page = 1, limit = 10, status, fromDate, endTimeAfter, endTimeBefore, initialData}: ProviderAppointmentsResponse) {
   const providerId = useAuthStore((s) => s.providerId)
 
   const params = new URLSearchParams({ page: String(page), limit: String(limit) })
@@ -21,6 +23,12 @@ export function useProviderAppointments({enabled = true, page = 1, limit = 10, s
   }
   if (fromDate) {
     params.append('fromDate', fromDate)
+  }
+  if (endTimeAfter) {
+    params.append('endTimeAfter', endTimeAfter)
+  }
+  if (endTimeBefore) {
+    params.append('endTimeBefore', endTimeBefore)
   }
   const key = enabled && providerId ? `/appointments/provider/${providerId}?${params}` : null
 

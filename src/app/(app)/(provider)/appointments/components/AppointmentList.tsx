@@ -16,6 +16,8 @@ const statusStyles: Record<Appointment['status'], string> = {
   CANCELLED: 'bg-red-100 text-red-700 border border-red-300',
 }
 
+const overdueStyle = 'bg-amber-100 text-amber-800 border border-amber-300'
+
 interface AppointmentListProps {
   tab: string
   appointments: AppointmentWithPatient[]
@@ -51,7 +53,7 @@ export default function AppointmentList({
 
       {!error && appointments.length === 0 && !isLoading && (
         <div className="text-muted-foreground text-sm py-8 text-center">
-          No {tab === 'upcoming' ? 'upcoming' : 'past'} appointments.
+          No {tab} appointments.
         </div>
       )}
 
@@ -71,9 +73,9 @@ export default function AppointmentList({
                     <div className="flex items-start justify-between">
                       <p className="font-semibold text-base truncate">{patientName}</p>
                       <span
-                        className={`text-xs font-medium px-2 py-0.5 rounded-full mb-2 ${statusStyles[appt.status]}`}
+                        className={`text-xs font-medium px-2 py-0.5 rounded-full mb-2 ${tab === 'overdue' ? overdueStyle : statusStyles[appt.status]}`}
                       >
-                        {appt.status}
+                        {tab === 'overdue' ? 'OVERDUE' : appt.status}
                       </span>
                     </div>
                     <p

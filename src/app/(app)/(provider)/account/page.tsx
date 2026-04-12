@@ -12,7 +12,6 @@ import { useUserProfile } from '@/hooks/useUserProfile'
 import { getNameColors } from '@/lib/colorMap'
 import { capitalize } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { ImSpinner2 } from 'react-icons/im'
 import { toast } from 'sonner'
@@ -24,8 +23,7 @@ const accountSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
   phone: z
     .string()
-    .min(10, { message: 'Phone number must be at least 10 digits' })
-    .regex(/^\d+$/, { message: 'Phone number must contain only digits' }),
+    .regex(/^\d{3}-\d{3}-\d{4}$/, { message: 'Phone number must be in XXX-XXX-XXXX format' }),
   specialty: z.string().min(1, { message: 'Specialty is required' }),
 })
 
@@ -34,35 +32,41 @@ type AccountFormValues = z.infer<typeof accountSchema>
 export default function AccountPage() {
   const { fullName, avatar, isLoading: displayLoading } = useCurrentUserDisplay()
   const { bg } = getNameColors(fullName)
-  const { data: profile, isLoading } = useUserProfile()
+  const { data: profile, isLoading, mutate } = useUserProfile()
   const providerId = useAuthStore((s) => s.providerId)
 
   const form = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      specialty: '',
-    },
+    values: profile
+      ? {
+          firstName: profile.firstName ?? '',
+          lastName: profile.lastName ?? '',
+          email: profile.email ?? '',
+          phone: profile.phone ?? '',
+          specialty: profile.specialty ?? '',
+        }
+      : undefined,
   })
 
-  useEffect(() => {
-    if (profile) {
-      form.reset({
-        firstName: profile.firstName ?? '',
-        lastName: profile.lastName ?? '',
-        email: profile.email ?? '',
-        phone: profile.phone ?? '',
-        specialty: profile.specialty ?? '',
-      })
-    }
-  }, [profile, form])
-
   const onSubmit = async (data: AccountFormValues) => {
-    console.log('Account update payload:', { providerId, ...data })
-    toast.success('Account updated successfully')
+    try {
+      const res = await fetch(`/api/providers/${providerId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      })
+
+      if (!res.ok) {
+        const body = await res.json()
+        throw new Error(body?.message ?? 'Failed to update account')
+      }
+
+      await mutate()
+      toast.success('Account updated successfully')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update account')
+    }
   }
 
   const loading = isLoading || displayLoading
@@ -71,9 +75,7 @@ export default function AccountPage() {
     <div className="space-y-8">
       <section className="space-y-3">
         <h1 className="text-left font-semibold text-3xl">Account</h1>
-        <p className="text-muted-foreground">
-          Update your personal details below.
-        </p>
+        <p className="text-muted-foreground">Update your personal details below.</p>
       </section>
 
       <Card className="max-w-2xl">

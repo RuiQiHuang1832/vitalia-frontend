@@ -11,13 +11,18 @@ import { useProviderAppointments } from '@/hooks/useProviderAppointments'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-type Tab = 'upcoming' | 'past'
+type Tab = 'upcoming' | 'overdue' | 'past'
 
 export default function AppointmentsClient({ initialData }: { initialData: AppointmentResponse }) {
   const searchParams = useSearchParams()
   const selectId = searchParams.get('select')
+  const initialTab = (searchParams.get('tab') as Tab) ?? 'upcoming'
 
-  const [tab, setTab] = useState<Tab>('upcoming')
+  const [tab, setTab] = useState<Tab>(
+    initialTab === 'upcoming' || initialTab === 'overdue' || initialTab === 'past'
+      ? initialTab
+      : 'upcoming'
+  )
   const [page, setPage] = useState(1)
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithPatient | null>(
     null
@@ -25,14 +30,16 @@ export default function AppointmentsClient({ initialData }: { initialData: Appoi
   const [encounterActive, setEncounterActive] = useState(false)
   const didAutoSelect = useRef(false)
 
-  // Stable "today" value that doesn't change between renders
-  const today = useMemo(() => new Date().toISOString().split('T')[0], [])
+  // Stable "now" for this render cycle — used as the boundary between upcoming/overdue
+  const now = useMemo(() => new Date().toISOString(), [])
 
   const { data, error, isLoading, mutate } = useProviderAppointments({
     page,
     limit: 10,
-    status: tab === 'upcoming' ? ['SCHEDULED'] : ['COMPLETED', 'CANCELLED'],
-    fromDate: tab === 'upcoming' ? today : undefined,
+    status:
+      tab === 'past' ? ['COMPLETED', 'CANCELLED'] : ['SCHEDULED'],
+    endTimeAfter: tab === 'upcoming' ? now : undefined,
+    endTimeBefore: tab === 'overdue' ? now : undefined,
     initialData: tab === 'upcoming' && page === 1 ? initialData : undefined,
   })
 
