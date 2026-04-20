@@ -1,5 +1,6 @@
-import { headers } from 'next/headers'
+import type { Allergy, Medication } from '@/app/(app)/(provider)/patients/types'
 import { jwtDecode } from 'jwt-decode'
+import { headers } from 'next/headers'
 
 type TokenPayload = {
   id: number
@@ -88,6 +89,115 @@ export async function getPatientById(id: number) {
   }
 
   return res.json()
+}
+
+export async function getPatientAppointments({
+  page = 1,
+  limit = 10,
+  status,
+}: {
+  page?: number
+  limit?: number
+  status?: string[]
+}) {
+  const { baseUrl, cookieHeader, decoded } = await getServerRequestContext()
+
+  const patientId = decoded?.patientId
+  if (!patientId) {
+    throw new Error('Patient ID not found in token')
+  }
+
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  })
+
+  if (status && status.length > 0) {
+    status.forEach((s) => params.append('status', s))
+  }
+
+  const url = new URL(`/api/appointments/patient/${patientId}?${params.toString()}`, baseUrl)
+
+  const res = await fetch(url, {
+    cache: 'no-store',
+    headers: {
+      Cookie: cookieHeader,
+    },
+  })
+  if (!res.ok) {
+    console.log('Status:', res.status)
+    throw new Error('Failed to fetch patient appointments')
+  }
+
+  return res.json()
+}
+
+export async function getPatientVitals() {
+  const { baseUrl, cookieHeader, decoded } = await getServerRequestContext()
+
+  const patientId = decoded?.patientId
+  if (!patientId) {
+    throw new Error('Patient ID not found in token')
+  }
+
+  const url = new URL(`/api/vitals/patient/${patientId}`, baseUrl)
+
+  const res = await fetch(url, {
+    cache: 'no-store',
+    headers: { Cookie: cookieHeader },
+  })
+  if (!res.ok) {
+    console.log('Status:', res.status)
+    throw new Error('Failed to fetch patient vitals')
+  }
+
+  return res.json()
+}
+
+export async function getPatientMedications(): Promise<Medication[]> {
+  const { baseUrl, cookieHeader, decoded } = await getServerRequestContext()
+
+  const patientId = decoded?.patientId
+  if (!patientId) {
+    throw new Error('Patient ID not found in token')
+  }
+
+  const url = new URL(`/api/medications/patient/${patientId}`, baseUrl)
+
+  const res = await fetch(url, {
+    cache: 'no-store',
+    headers: { Cookie: cookieHeader },
+  })
+  if (!res.ok) {
+    console.log('Status:', res.status)
+    throw new Error('Failed to fetch patient medications')
+  }
+
+  const grouped = (await res.json()) as Record<string, Medication[]>
+  return Object.values(grouped).flat()
+}
+
+export async function getPatientAllergies(): Promise<Allergy[]> {
+  const { baseUrl, cookieHeader, decoded } = await getServerRequestContext()
+
+  const patientId = decoded?.patientId
+  if (!patientId) {
+    throw new Error('Patient ID not found in token')
+  }
+
+  const url = new URL(`/api/allergies/patient/${patientId}`, baseUrl)
+
+  const res = await fetch(url, {
+    cache: 'no-store',
+    headers: { Cookie: cookieHeader },
+  })
+  if (!res.ok) {
+    console.log('Status:', res.status)
+    throw new Error('Failed to fetch patient allergies')
+  }
+
+  const grouped = (await res.json()) as Record<string, Allergy[]>
+  return Object.values(grouped).flat()
 }
 
 export async function getProviderAppointments({

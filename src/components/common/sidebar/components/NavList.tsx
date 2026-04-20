@@ -1,20 +1,12 @@
 'use client'
 
-import { ExternalLink, Eye, KeyRound, MoreHorizontal, type LucideIcon } from 'lucide-react'
+import { type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,

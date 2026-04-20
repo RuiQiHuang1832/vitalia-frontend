@@ -11,10 +11,12 @@ export default function Login() {
           <div>
             <p className="font-medium">Work in Progress</p>
             <p className="mt-1 text-blue-700 dark:text-blue-300">
-              This site is under active development. Currently only the{' '}
-              <span className="font-semibold">Provider</span> dashboard is functional.
-              Please log in with a <span className="font-semibold">provider account</span>{' '}
-              — admin and patient portals are not yet available.
+              This site is under active development. The{' '}
+              <span className="font-semibold">Provider</span> dashboard and{' '}
+              <span className="font-semibold">Patient</span> portal are functional.
+              Please log in with a <span className="font-semibold">provider</span> or{' '}
+              <span className="font-semibold">patient</span> account — the admin portal
+              is not yet available.
             </p>
           </div>
         </div>

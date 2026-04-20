@@ -5,7 +5,7 @@ import {
   Calendar,
   ClipboardList,
   Clock,
-  HeartPulse,
+  FolderHeart,
   Settings,
   ShieldCheck,
   Users,
@@ -69,41 +69,22 @@ const providerNavigation = {
   listName: 'Administration',
 }
 const patientNavigation = {
-  navGroup: [
-    {
-      title: 'Health Records',
-      url: '#',
-      icon: HeartPulse,
-      items: [
-        {
-          title: 'Visit Notes',
-          url: '#',
-        },
-        {
-          title: 'Medications',
-          url: '#',
-        },
-        {
-          title: 'Allergies',
-          url: '#',
-        },
-        {
-          title: 'Vitals',
-          url: '#',
-        },
-      ],
-    },
-  ],
+  navGroup: [],
   navList: [
     {
       name: 'Appointments',
-      url: '#',
+      url: '/portal/appointments',
       icon: Calendar,
+    },
+    {
+      name: 'Medical Records',
+      url: '/portal/medical-records',
+      icon: FolderHeart,
     },
   ],
   variant: 'Patient',
-  groupName: 'My Health',
-  listName: 'My Account',
+  groupName: '',
+  listName: 'My Health',
 }
 const adminNavigation = {
   navGroup: [
@@ -181,7 +162,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavHeader name={navigation.variant}></NavHeader>
       </SidebarHeader>
       <SidebarContent>
-        <NavDashboard />
+        {role !== 'PATIENT' && <NavDashboard />}
         {navigation.navGroup?.length > 0 && (
           <NavGroup groupName={navigation.groupName} items={navigation.navGroup} />
         )}

@@ -16,6 +16,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { useAuthStore } from '@/app/(auth)/stores/auth.store'
 import { useCurrentUserDisplay } from '@/hooks/useCurrentUserDisplay'
 import { logout } from '@/lib/auth'
 import { getNameColors } from '@/lib/colorMap'
@@ -26,6 +27,7 @@ export function NavUser() {
   const { isMobile } = useSidebar()
   const { greeting, fullName, displayName, avatar, email, specialty, isLoading } =
     useCurrentUserDisplay()
+  const role = useAuthStore((s) => s.user?.role)
   const { bg } = getNameColors(fullName)
   return (
     <SidebarMenu>
@@ -83,15 +85,19 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link href="/account">
-                  <BadgeCheck />
-                  Account
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+            {role === 'PROVIDER' && (
+              <>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account">
+                      <BadgeCheck />
+                      Account
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem
               onSelect={(e) => {
                 e.preventDefault()

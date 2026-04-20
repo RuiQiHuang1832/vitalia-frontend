@@ -27,7 +27,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  status: 'authenticated', // change to 'loading' if you want to show a loading state while checking auth (TEMP)
+  status: 'loading',
   providerId: undefined,
   patientId: undefined,
   setSession: (payload: SessionPayload) =>

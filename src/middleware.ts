@@ -20,7 +20,7 @@ function redirectLoggedInFromLogin(req: NextRequest, role: Role) {
   if (req.nextUrl.pathname === '/login') {
     switch (role) {
       case 'PATIENT':
-        return NextResponse.redirect(new URL('/portal', req.url))
+        return NextResponse.redirect(new URL('/portal/appointments', req.url))
       case 'PROVIDER':
         return NextResponse.redirect(new URL('/dashboard', req.url))
       case 'ADMIN':
