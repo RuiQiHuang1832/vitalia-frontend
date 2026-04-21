@@ -42,6 +42,7 @@ next-env.d.ts
 /notes.md
 /.env.local
 /test-results
+/playwright-report
 .auth/
 /tests/.auth/
 /.vscode/tasks.json
