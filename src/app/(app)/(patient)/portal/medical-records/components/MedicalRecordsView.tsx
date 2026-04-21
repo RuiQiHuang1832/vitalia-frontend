@@ -40,16 +40,18 @@ export default function MedicalRecordsView({
   appointments,
 }: Props) {
   return (
-    <div className="space-y-6 max-w-5xl py-5">
-      <header className="space-y-1">
-        <h1 className="text-left font-semibold text-3xl">Medical Records</h1>
+    <div className="space-y-6 max-w-5xl">
+      <section className="space-y-3">
+        <h1 className="text-left font-semibold text-3xl">
+           Medical Records
+        </h1>
         <p className="text-muted-foreground">
-          Your vitals, medications, allergies, and visit notes — all in one place.
+          Review your health information, including vitals, medications, allergies, and visit notes. Contact your provider if you have any questions or need to update your records.
         </p>
-      </header>
+      </section>
 
       <Tabs defaultValue="vitals" className="gap-6">
-        <TabsList className="w-full md:w-fit">
+        <TabsList className="w-full md:w-fit gap-3">
           <TabsTrigger value="vitals">
             <Activity className="w-4 h-4" />
             Vitals
@@ -147,9 +149,7 @@ function VitalsSection({ vitals }: { vitals: Vital[] }) {
   const o2 = getLatest(sorted, 'oxygenSaturation')
 
   const bpValue =
-    bpSys?.value != null && bpDia?.value != null
-      ? `${bpSys.value}/${bpDia.value} mmHg`
-      : '—'
+    bpSys?.value != null && bpDia?.value != null ? `${bpSys.value}/${bpDia.value} mmHg` : '—'
 
   return (
     <div className="space-y-6">
@@ -413,9 +413,7 @@ function VisitNotesSection({ appointments }: { appointments: AppointmentWithProv
   return (
     <div className="space-y-4">
       {withNotes.map((appt) => {
-        const latest = appt.visitNote!.versions.reduce((a, b) =>
-          a.version >= b.version ? a : b
-        )
+        const latest = appt.visitNote!.versions.reduce((a, b) => (a.version >= b.version ? a : b))
         return (
           <Card key={appt.id}>
             <CardHeader>

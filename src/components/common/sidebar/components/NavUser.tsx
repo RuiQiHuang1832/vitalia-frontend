@@ -98,6 +98,19 @@ export function NavUser() {
                 <DropdownMenuSeparator />
               </>
             )}
+            {role === 'PATIENT' && (
+              <>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/portal/profile">
+                      <BadgeCheck />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem
               onSelect={(e) => {
                 e.preventDefault()

@@ -14,3 +14,14 @@ export async function loginAsProvider(page: Page) {
   // Optional: confirm login succeeded
   await page.getByText('My Day').waitFor()
 }
+
+export async function loginAsPatient(page: Page) {
+  await page.goto('http://localhost:3000/login')
+
+  await page.getByRole('textbox', { name: 'Email' }).fill(process.env.E2E_PATIENT_EMAIL!)
+  await page.getByRole('textbox', { name: 'Password' }).fill(process.env.E2E_PATIENT_PASSWORD!)
+
+  await page.getByRole('button', { name: 'Sign in' }).click()
+
+  await page.waitForURL('**/portal/appointments')
+}

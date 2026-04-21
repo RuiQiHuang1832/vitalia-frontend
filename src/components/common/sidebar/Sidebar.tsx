@@ -13,7 +13,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 
 import { usePathname } from 'next/navigation'
 import { Fragment } from 'react'
-import { capitalize } from '../../../lib/utils'
+import { capitalizeWords } from '../../../lib/utils'
 
 // Map route segments to display labels
 const labelMap: Record<string, string> = {
@@ -23,6 +23,7 @@ const labelMap: Record<string, string> = {
   admin: 'Admin',
   'audit-logs': 'Audit Logs',
   availability: 'Availability',
+  'medical-records': 'Medical Records',
   // Add more mappings as needed
   // dynamic segments like IDs are handled below
 }
@@ -40,6 +41,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const breadcrumbs = getBreadcrumbs(pathname)
 
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -51,7 +53,8 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             <Breadcrumb>
               <BreadcrumbList>
                 {breadcrumbs.map((crumb, index) => {
-                  const label = capitalize(crumb.label)
+                  const label = capitalizeWords(crumb.label)
+                  console.log(label)
                   return (
                     <Fragment key={index}>
                       <BreadcrumbItem className="hidden md:block">

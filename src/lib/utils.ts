@@ -11,6 +11,12 @@ export const capitalize = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 }
 
+export const capitalizeWords = (str: string) => {
+  if (!str) return ''
+
+  return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
 export function calculateAge(dobIso: string): number {
   const dob = new Date(dobIso)
   const today = new Date()
