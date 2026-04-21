@@ -1,15 +1,6 @@
 'use client'
 
-import {
-  BarChart3,
-  Calendar,
-  ClipboardList,
-  Clock,
-  FolderHeart,
-  Settings,
-  ShieldCheck,
-  Users,
-} from 'lucide-react'
+import { Calendar, ClipboardList, Clock, FolderHeart, Users } from 'lucide-react'
 import * as React from 'react'
 
 import { useAuthStore } from '@/app/(auth)/stores/auth.store'
@@ -87,65 +78,22 @@ const patientNavigation = {
   listName: 'My Health',
 }
 const adminNavigation = {
-  navGroup: [
-    {
-      title: 'User Management',
-      url: '#',
-      icon: Users,
-      isActive: true,
-      items: [
-        {
-          title: 'All Users',
-          url: '/admin/users',
-        },
-        {
-          title: 'Providers',
-          url: '/admin/providers',
-        },
-        {
-          title: 'Patients',
-          url: '/admin/patients',
-        },
-      ],
-    },
-    {
-      title: 'System Oversight',
-      url: '#',
-      icon: ShieldCheck,
-      items: [
-        {
-          title: 'Audit Logs',
-          url: '/admin/audit-logs',
-        },
-        {
-          title: 'Login Activity',
-          url: '/admin/sessions',
-        },
-      ],
-    },
-  ],
-
+  navGroup: [],
   navList: [
     {
-      name: 'Appointments',
-      url: '/admin/appointments',
-      icon: Calendar,
+      name: 'Users',
+      url: '/admin/users',
+      icon: Users,
     },
     {
-      name: 'System Metrics',
-      url: '/admin/metrics',
-      icon: BarChart3,
-    },
-    {
-      name: 'Settings',
-      url: '/admin/settings',
-      icon: Settings,
+      name: 'Audit Logs',
+      url: '/admin/audit-logs',
+      icon: ClipboardList,
     },
   ],
-
   variant: 'Admin',
-  groupName: 'Administration',
-  listName: 'System',
+  groupName: '',
+  listName: 'Administration',
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -162,7 +110,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavHeader name={navigation.variant}></NavHeader>
       </SidebarHeader>
       <SidebarContent>
-        {role !== 'PATIENT' && <NavDashboard />}
+        {role == "PROVIDER" && <NavDashboard />}
         {navigation.navGroup?.length > 0 && (
           <NavGroup groupName={navigation.groupName} items={navigation.navGroup} />
         )}

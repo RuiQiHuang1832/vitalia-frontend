@@ -42,7 +42,7 @@ const ACTION_VARIANT: Record<AuditAction, 'default' | 'secondary' | 'destructive
   VIEW: 'outline',
 }
 
-const LIMIT = 20
+const LIMIT = 10
 
 function formatEntity(entity: string) {
   return entity.replace(/_/g, ' ')
