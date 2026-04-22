@@ -200,6 +200,40 @@ export async function getPatientAllergies(): Promise<Allergy[]> {
   return Object.values(grouped).flat()
 }
 
+export async function getUsers({
+  page = 1,
+  limit = 10,
+  role,
+}: {
+  page?: number
+  limit?: number
+  role?: string
+}) {
+  const { baseUrl, cookieHeader } = await getServerRequestContext()
+
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  })
+
+  if (role) {
+    params.append('role', role)
+  }
+
+  const url = new URL(`/api/users?${params.toString()}`, baseUrl)
+
+  const res = await fetch(url, {
+    cache: 'no-store',
+    headers: { Cookie: cookieHeader },
+  })
+  if (!res.ok) {
+    console.log('Status:', res.status)
+    throw new Error('Failed to fetch users')
+  }
+
+  return res.json()
+}
+
 export async function getProviderAppointments({
   page = 1,
   limit = 10,

@@ -24,7 +24,7 @@ function redirectLoggedInFromLogin(req: NextRequest, role: Role) {
       case 'PROVIDER':
         return NextResponse.redirect(new URL('/dashboard', req.url))
       case 'ADMIN':
-        return NextResponse.redirect(new URL('/admin', req.url))
+        return NextResponse.redirect(new URL('/admin/users', req.url))
     }
   }
   return null
@@ -44,8 +44,13 @@ function enforceRoleRoutes(req: NextRequest, role: Role) {
     return NextResponse.redirect(new URL('/unauthorized', req.url))
   }
 
-  if (pathname.startsWith('/admin') && role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/unauthorized', req.url))
+  if (pathname.startsWith('/admin')) {
+    if (role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/unauthorized', req.url))
+    }
+    if (pathname === '/admin' || pathname === '/admin/') {
+      return NextResponse.redirect(new URL('/admin/users', req.url))
+    }
   }
 
   return null

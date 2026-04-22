@@ -14,12 +14,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [status, router])
 
-  if (status === 'loading') {
-    return <div>Loading...</div>
-  }
-
   if (status === 'unauthenticated') {
-    // prevent flash of protected content
     return null
   }
 
