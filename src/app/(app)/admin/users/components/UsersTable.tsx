@@ -40,21 +40,16 @@ import {
   type UserStatus,
   type UsersFilters,
   type UsersResponse,
-} from './types'
+} from '../types'
+import { AddProviderSheet } from './AddProviderSheet'
 
-const ROLE_VARIANT: Record<
-  UserRow['role'],
-  'default' | 'secondary' | 'destructive' | 'outline'
-> = {
+const ROLE_VARIANT: Record<UserRow['role'], 'default' | 'secondary' | 'destructive' | 'outline'> = {
   ADMIN: 'default',
   PROVIDER: 'secondary',
   PATIENT: 'outline',
 }
 
-const STATUS_VARIANT: Record<
-  UserStatus,
-  'default' | 'secondary' | 'destructive' | 'outline'
-> = {
+const STATUS_VARIANT: Record<UserStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   ACTIVE: 'default',
   INACTIVE: 'destructive',
   DISCHARGED: 'secondary',
@@ -91,9 +86,7 @@ export default function UsersTable({ initialData }: UsersTableProps) {
     page,
     pageSize,
     filters,
-    page === 1 && roleFilter === 'ALL' && pageSize === DEFAULT_PAGE_SIZE
-      ? initialData
-      : undefined
+    page === 1 && roleFilter === 'ALL' && pageSize === DEFAULT_PAGE_SIZE ? initialData : undefined
   )
 
   function handleToggleClick(row: UserRow) {
@@ -118,9 +111,7 @@ export default function UsersTable({ initialData }: UsersTableProps) {
         const errorData = await res.json().catch(() => null)
         throw new Error(errorData?.message ?? 'Failed to update status')
       }
-      toast.success(
-        `Provider ${nextStatus === 'ACTIVE' ? 'activated' : 'deactivated'}`
-      )
+      toast.success(`Provider ${nextStatus === 'ACTIVE' ? 'activated' : 'deactivated'}`)
       mutate()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'An unexpected error occurred')
@@ -153,6 +144,9 @@ export default function UsersTable({ initialData }: UsersTableProps) {
             ))}
           </SelectContent>
         </Select>
+        <div className="ml-auto">
+          <AddProviderSheet onCreated={() => mutate()} />
+        </div>
       </div>
 
       {/* Table */}
@@ -179,8 +173,7 @@ export default function UsersTable({ initialData }: UsersTableProps) {
             ) : error ? (
               <TableRow>
                 <TableCell colSpan={7} className="h-24 text-center text-destructive">
-                  Failed to load users.{' '}
-                  {error instanceof Error ? error.message : 'Unknown error'}
+                  Failed to load users. {error instanceof Error ? error.message : 'Unknown error'}
                 </TableCell>
               </TableRow>
             ) : data?.data.length === 0 ? (
@@ -221,11 +214,7 @@ export default function UsersTable({ initialData }: UsersTableProps) {
                           disabled={isToggling}
                           onClick={() => handleToggleClick(row)}
                         >
-                          {isToggling
-                            ? '...'
-                            : row.status === 'ACTIVE'
-                              ? 'Deactivate'
-                              : 'Activate'}
+                          {isToggling ? '...' : row.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
                         </Button>
                       ) : (
                         <span className="text-muted-foreground text-sm">—</span>

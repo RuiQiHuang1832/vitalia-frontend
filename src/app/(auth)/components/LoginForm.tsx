@@ -25,6 +25,12 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 })
 
+const DEMO_ACCOUNTS = [
+  { role: 'Provider', email: 'provider@gmail.com', password: 'admin123' },
+  { role: 'Patient', email: 'patient@gmail.com', password: 'admin123' },
+  { role: 'Admin', email: 'admin@gmail.com', password: 'admin123' },
+] as const
+
 export default function LoginForm() {
   const { user, status } = useAuthStore()
   const router = useRouter()
@@ -36,6 +42,14 @@ export default function LoginForm() {
       password: '',
     },
   })
+
+  const [watchedEmail, watchedPassword] = form.watch(['email', 'password'])
+  const canSubmit = watchedEmail.length > 0 && watchedPassword.length > 0
+
+  const fillDemo = (account: (typeof DEMO_ACCOUNTS)[number]) => {
+    form.setValue('email', account.email, { shouldValidate: true, shouldDirty: true })
+    form.setValue('password', account.password, { shouldValidate: true, shouldDirty: true })
+  }
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
@@ -97,6 +111,24 @@ export default function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="mb-5">
+          <p className="mb-2 text-center text-xs text-muted-foreground">
+            Click a role below to auto-fill the credentials, then press Sign in.
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {DEMO_ACCOUNTS.map((acc) => (
+              <Button
+                key={acc.role}
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fillDemo(acc)}
+              >
+                {acc.role}
+              </Button>
+            ))}
+          </div>
+        </div>
         <form id="login-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup className="gap-5">
             <Controller
@@ -146,7 +178,7 @@ export default function LoginForm() {
           <Button
             type="submit"
             form="login-form"
-            disabled={form.formState.isSubmitting}
+            disabled={!canSubmit || form.formState.isSubmitting}
             className={cn(form.formState.isSubmitting && 'bg-gray-400')}
           >
             {form.formState.isSubmitting ? <ImSpinner2 className="animate-spin" /> : 'Sign in'}

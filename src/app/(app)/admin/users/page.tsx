@@ -1,5 +1,5 @@
 import { getUsers } from '@/lib/api.server'
-import UsersTable from './UsersTable'
+import UsersTable from './components/UsersTable'
 import type { UsersResponse } from './types'
 
 export default async function UsersPage() {
@@ -9,9 +9,7 @@ export default async function UsersPage() {
     <div className="space-y-6">
       <section className="space-y-3">
         <h1 className="text-left font-semibold text-3xl">User Management</h1>
-        <p className="text-muted-foreground">
-          Manage all user accounts and their permissions.
-        </p>
+        <p className="text-muted-foreground">Manage all user accounts and their permissions.</p>
       </section>
       <UsersTable initialData={initialData} />
     </div>
