@@ -1,4 +1,15 @@
 import { useAuthStore } from '@/app/(auth)/stores/auth.store'
+import { mutate } from 'swr'
+
+// Wipe every SWR cache entry so a different user logging in on the same
+// tab can't briefly see the previous user's data. The conversations list
+// was the trigger — provider's cached convos showed up for a frame after
+// switching to a patient account, since SWR keys (e.g. '/conversations')
+// are user-agnostic.
+export async function clearSWRCache() {
+  await mutate(() => true, undefined, { revalidate: false })
+}
+
 export async function hydrateAuth() {
   const justLoggedIn = sessionStorage.getItem('justLoggedIn')
 
@@ -37,4 +48,5 @@ export async function logout() {
   })
 
   useAuthStore.getState().clearUser()
+  await clearSWRCache()
 }

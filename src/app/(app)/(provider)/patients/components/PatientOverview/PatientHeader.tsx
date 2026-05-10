@@ -1,5 +1,6 @@
 import AddAppointmentDialog from '@/app/(app)/(provider)/patients/components/AddAppointmentDialog'
 import { PatientBase, type Patient } from '@/app/(app)/(provider)/patients/types'
+import MessagePatientButton from '@/app/(app)/messages/components/MessagePatientButton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -47,15 +48,18 @@ export default function PatientHeader({ data: patient }: PatientHeaderProps) {
           </div>
         </Stack>
         <CardAction>
-          <AddAppointmentDialog
-            patientId={patient.id}
-            trigger={
-              <Button className="hover:bg-teal-700 bg-teal-600 text-white">
-                <Plus />
-                New Appointment
-              </Button>
-            }
-          />
+          <Stack gap={2}>
+            {patient.userId != null && <MessagePatientButton userId={patient.userId} />}
+            <AddAppointmentDialog
+              patientId={patient.id}
+              trigger={
+                <Button className="hover:bg-teal-700 bg-teal-600 text-white">
+                  <Plus />
+                  New Appointment
+                </Button>
+              }
+            />
+          </Stack>
         </CardAction>
       </CardHeader>
       <CardContent>

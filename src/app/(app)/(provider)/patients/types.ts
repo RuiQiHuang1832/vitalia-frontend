@@ -7,6 +7,7 @@ export type Patient = {
   age: Date
   status: Status
   lastVisit: string
+  userId: number | null
 }
 
 export type PatientsResponse = {

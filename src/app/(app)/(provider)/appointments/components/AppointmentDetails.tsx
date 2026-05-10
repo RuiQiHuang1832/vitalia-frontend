@@ -9,6 +9,7 @@ import VisitNoteSection from '@/app/(app)/(provider)/appointments/components/sec
 import VitalsSection from '@/app/(app)/(provider)/appointments/components/sections/VitalsSection'
 import AddAppointmentDialog from '@/app/(app)/(provider)/patients/components/AddAppointmentDialog'
 import { type AppointmentWithPatient } from '@/app/(app)/(provider)/patients/types'
+import MessagePatientButton from '@/app/(app)/messages/components/MessagePatientButton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -132,7 +133,10 @@ export default function AppointmentDetails({
               {formatTime(appointment.endTime)}
             </p>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
+            {appointment.patient.userId != null && (
+              <MessagePatientButton userId={appointment.patient.userId} size="sm" />
+            )}
             {!readOnly && (
               <>
                 <DropdownMenu>

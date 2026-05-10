@@ -53,6 +53,12 @@ function enforceRoleRoutes(req: NextRequest, role: Role) {
     }
   }
 
+  // Messages is shared between PATIENT and PROVIDER. ADMIN doesn't take
+  // part in conversations and gets bounced back to their own landing page.
+  if (pathname.startsWith('/messages') && role === 'ADMIN') {
+    return NextResponse.redirect(new URL('/admin/users', req.url))
+  }
+
   return null
 }
 
@@ -80,5 +86,6 @@ export const config = {
     '/account/:path*',
     '/portal/:path*',
     '/admin/:path*',
+    '/messages/:path*',
   ],
 }

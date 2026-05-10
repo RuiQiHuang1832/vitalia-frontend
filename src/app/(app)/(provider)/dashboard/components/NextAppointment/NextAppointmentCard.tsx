@@ -1,5 +1,6 @@
 import NextAppointmentSkeleton from '@/app/(app)/(provider)/dashboard/components/NextAppointment/NextAppointmentSkeleton'
 import { type AppointmentWithPatient, type Vital } from '@/app/(app)/(provider)/patients/types'
+import MessagePatientButton from '@/app/(app)/messages/components/MessagePatientButton'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -15,7 +16,6 @@ import { capitalize, cn, formatTime, getPatientDisplay } from '@/lib/utils'
 import {
   Activity,
   Calendar,
-  ClipboardPlus,
   Droplet,
   FileText,
   HeartPulse,
@@ -87,7 +87,11 @@ function getStatusBadge(appointment: AppointmentWithPatient) {
 
 export default function NextAppointmentCard() {
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
-  const { data: payload, isLoading, error } = useProviderAppointments({
+  const {
+    data: payload,
+    isLoading,
+    error,
+  } = useProviderAppointments({
     limit: 1,
     status: ['SCHEDULED'],
     fromDate: today,
@@ -99,9 +103,7 @@ export default function NextAppointmentCard() {
     return (
       <Card className="h-full">
         <CardContent className="py-12">
-          <p className="text-sm text-muted-foreground text-center">
-            No upcoming appointments.
-          </p>
+          <p className="text-sm text-muted-foreground text-center">No upcoming appointments.</p>
         </CardContent>
       </Card>
     )
@@ -110,7 +112,13 @@ export default function NextAppointmentCard() {
   const appointment = payload.data[0] as AppointmentWithPatient
   const { patient, reason, startTime, endTime, vitals } = appointment
   const { gender } = patient
-  const { name: patientName, initials, age, mrn, colors: { bg, border, ring } } = getPatientDisplay(patient, appointment.patientId)
+  const {
+    name: patientName,
+    initials,
+    age,
+    mrn,
+    colors: { bg, border, ring },
+  } = getPatientDisplay(patient, appointment.patientId)
   const latestVital = vitals?.[vitals.length - 1] ?? null
   const { label, dotColor } = getStatusBadge(appointment)
 
@@ -136,15 +144,15 @@ export default function NextAppointmentCard() {
 
       <CardContent className="space-y-6">
         <div className="flex items-start gap-4">
-          <div className={`flex h-12 w-12 items-center justify-center rounded-full font-medium ${bg} ${border} ${ring}`}>
+          <div
+            className={`flex h-12 w-12 items-center justify-center rounded-full font-medium ${bg} ${border} ${ring}`}
+          >
             {initials}
           </div>
 
           <div className="flex-1">
             <Stack justify="between">
-              <p className="font-semibold">
-                {patientName}
-              </p>
+              <p className="font-semibold">{patientName}</p>
               <p className="text-xs text-muted-foreground">{mrn}</p>
             </Stack>
             <div className="space-y-1">
@@ -222,12 +230,7 @@ export default function NextAppointmentCard() {
             View Chart
           </Link>
         </Button>
-        <Button variant="outline" asChild>
-          <Link href={`/appointments?select=${appointment.id}`}>
-            <ClipboardPlus className="h-4 w-4" />
-            Add Vitals
-          </Link>
-        </Button>
+        {patient.userId != null && <MessagePatientButton userId={patient.userId} />}
       </CardFooter>
     </Card>
   )

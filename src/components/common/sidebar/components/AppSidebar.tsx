@@ -1,9 +1,9 @@
 'use client'
 
-import { Calendar, ClipboardList, Clock, FolderHeart, Users } from 'lucide-react'
+import { Calendar, ClipboardList, Clock, FolderHeart, MessageSquare, Users } from 'lucide-react'
 import * as React from 'react'
 
-import { useAuthStore } from '@/app/(auth)/stores/auth.store'
+import { type Role, useAuthStore } from '@/app/(auth)/stores/auth.store'
 import { NavDashboard } from '@/components/common/sidebar/components/NavDashboard'
 import { NavGroup } from '@/components/common/sidebar/components/NavGroup'
 import { NavHeader } from '@/components/common/sidebar/components/NavHeader'
@@ -45,6 +45,11 @@ const providerNavigation = {
   ],
   navList: [
     {
+      name: 'Messages',
+      url: '/messages',
+      icon: MessageSquare,
+    },
+    {
       name: 'Audit Logs',
       url: '/audit-logs',
       icon: ClipboardList,
@@ -72,6 +77,11 @@ const patientNavigation = {
       url: '/portal/medical-records',
       icon: FolderHeart,
     },
+    {
+      name: 'Messages',
+      url: '/messages',
+      icon: MessageSquare,
+    },
   ],
   variant: 'Patient',
   groupName: '',
@@ -96,10 +106,14 @@ const adminNavigation = {
   listName: 'Administration',
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useAuthStore()
-
-  const role = user?.role
+export function AppSidebar({
+  initialRole,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { initialRole: Role | null }) {
+  const storeRole = useAuthStore((s) => s.user?.role)
+  // Prefer the hydrated store role, fall back to the server-resolved role
+  // on first paint so patients/admins don't briefly see the provider sidebar.
+  const role = storeRole ?? initialRole ?? undefined
 
   const navigation =
     role === 'PATIENT' ? patientNavigation : role === 'ADMIN' ? adminNavigation : providerNavigation

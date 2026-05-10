@@ -234,6 +234,46 @@ export async function getUsers({
   return res.json()
 }
 
+// Server-side initial fetch for the messages page. Returns the current
+// user's conversations sorted by most recent activity. Used as fallbackData
+// for the SWR hook on the client so the first paint has data.
+export async function getConversations() {
+  const { baseUrl, cookieHeader } = await getServerRequestContext()
+
+  const url = new URL(`/api/conversations`, baseUrl)
+
+  const res = await fetch(url, {
+    cache: 'no-store',
+    headers: { Cookie: cookieHeader },
+  })
+  if (!res.ok) {
+    console.log('Status:', res.status)
+    throw new Error('Failed to fetch conversations')
+  }
+
+  return res.json()
+}
+
+// The current user's id, decoded from the JWT cookie at request time.
+// Passed to the messages page so the conversation list can resolve "the
+// other participant" on first paint without waiting for client-side
+// auth hydration (which would otherwise flash wrong names).
+export async function getCurrentUserId(): Promise<number | null> {
+  const { decoded } = await getServerRequestContext()
+  return decoded?.id ?? null
+}
+
+// The current user's role, decoded from the JWT cookie at request time.
+// Used by the app layout to render the correct sidebar variant on first
+// paint — without this, the client falls back to the provider sidebar
+// while Zustand auth is still hydrating.
+export async function getCurrentRole(): Promise<'ADMIN' | 'PROVIDER' | 'PATIENT' | null> {
+  const { decoded } = await getServerRequestContext()
+  const role = decoded?.role
+  if (role === 'ADMIN' || role === 'PROVIDER' || role === 'PATIENT') return role
+  return null
+}
+
 export async function getProviderAppointments({
   page = 1,
   limit = 10,

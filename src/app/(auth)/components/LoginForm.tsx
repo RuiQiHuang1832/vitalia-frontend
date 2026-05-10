@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { clearSWRCache } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
@@ -77,6 +78,10 @@ export default function LoginForm() {
         patientId: json.user.patientId ?? null,
       }
 
+      // Drop any SWR data from a previous account on this tab before
+      // navigating into the app — otherwise the next page can paint the
+      // previous user's cached data for a frame.
+      await clearSWRCache()
       useAuthStore.getState().setSession(payload)
       // Set flag to skip hydration, fixes COOKIE RACE
       sessionStorage.setItem('justLoggedIn', 'true')

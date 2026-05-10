@@ -31,9 +31,11 @@ import {
   Eye,
   History,
   ListChecks,
+  MessageSquare,
   MoreHorizontal,
   X,
 } from 'lucide-react'
+import { useStartConversation } from '@/hooks/useStartConversation'
 import { toast } from 'sonner'
 import { useSWRConfig } from 'swr'
 import type { Patient } from '../types'
@@ -48,6 +50,7 @@ function ActionsCell({ row }: { row: Row<Patient> }) {
   const patient = row.original
 
   const { updatePatient, isLoading } = useUpdatePatient()
+  const { startConversation, busy: messaging } = useStartConversation()
   const getIdFromMrn = (mrn: string) => Number.parseInt(mrn.replace(/^MRN-/, ''), 10)
   const { mutate } = useSWRConfig()
   return (
@@ -69,6 +72,19 @@ function ActionsCell({ row }: { row: Row<Patient> }) {
             View Patient
           </Link>
         </DropdownMenuItem>
+
+        {patient.userId != null && (
+          <DropdownMenuItem
+            disabled={messaging}
+            onSelect={(e) => {
+              e.preventDefault()
+              if (patient.userId != null) startConversation(patient.userId)
+            }}
+          >
+            <MessageSquare className="h-4 w-4" />
+            Message Patient
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="gap-2">

@@ -45,6 +45,7 @@ export default function PatientsTable({ initialData }: { initialData: PatientsRe
       age: new Date(p.dob),
       lastVisit: p.appointments[0]?.startTime ?? null,
       status: p.status,
+      userId: p.userId,
     }))
   }, [payload?.data])
 
