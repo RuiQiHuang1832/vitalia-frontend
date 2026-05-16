@@ -2,8 +2,9 @@
 
 import type { Message } from '@/app/(app)/messages/types'
 import { Button } from '@/components/ui/button'
+import { getSocket } from '@/lib/socket'
 import { Send } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 type Props = {
@@ -11,15 +12,50 @@ type Props = {
   onSent: (message: Message) => void
 }
 
-// Bottom-of-thread input. Plain controlled textarea + submit button.
-// Enter submits (Shift+Enter for newline) — matches typical messaging UX.
-//
-// Validation duplicates the server contract (non-empty, max 4000) so the
-// UI can short-circuit without a round-trip; the server is still the
-// source of truth, which is why we surface backend errors via toast.
+const TYPING_START_THROTTLE_MS = 2000
+const TYPING_STOP_DEBOUNCE_MS = 3000
+
 export default function MessageComposer({ conversationId, onSent }: Props) {
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
+
+  const lastTypingStartRef = useRef(0)
+  const stopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function emitTypingStop() {
+    if (stopTimerRef.current) {
+      clearTimeout(stopTimerRef.current)
+      stopTimerRef.current = null
+    }
+    if (lastTypingStartRef.current === 0) return
+    lastTypingStartRef.current = 0
+    getSocket().emit('typing:stop', { conversationId })
+  }
+
+  useEffect(() => {
+    return () => emitTypingStop()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId])
+
+  function handleBodyChange(value: string) {
+    setBody(value)
+
+    if (value.trim().length === 0) {
+      emitTypingStop()
+      return
+    }
+
+    const now = Date.now()
+    const socket = getSocket()
+    // throttle
+    if (now - lastTypingStartRef.current >= TYPING_START_THROTTLE_MS) {
+      lastTypingStartRef.current = now
+      socket.emit('typing:start', { conversationId })
+    }
+    //debounce
+    if (stopTimerRef.current) clearTimeout(stopTimerRef.current)
+    stopTimerRef.current = setTimeout(emitTypingStop, TYPING_STOP_DEBOUNCE_MS)
+  }
 
   async function send() {
     const trimmed = body.trim()
@@ -30,6 +66,7 @@ export default function MessageComposer({ conversationId, onSent }: Props) {
     }
 
     setSending(true)
+    emitTypingStop()
     try {
       const res = await fetch(`/api/conversations/${conversationId}/messages`, {
         method: 'POST',
@@ -41,8 +78,6 @@ export default function MessageComposer({ conversationId, onSent }: Props) {
       if (!res.ok) {
         throw new Error(data?.message ?? 'Failed to send')
       }
-      // Clear before notifying parent so the next render doesn't briefly
-      // show stale text in the composer.
       setBody('')
       onSent(data as Message)
     } catch (err) {
@@ -52,8 +87,6 @@ export default function MessageComposer({ conversationId, onSent }: Props) {
     }
   }
 
-  // Enter sends, Shift+Enter inserts a newline. preventDefault on the
-  // submitting Enter so the textarea doesn't also insert a line break.
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -65,7 +98,7 @@ export default function MessageComposer({ conversationId, onSent }: Props) {
     <div className="border-t p-3 flex gap-2 items-end shrink-0">
       <textarea
         value={body}
-        onChange={(e) => setBody(e.target.value)}
+        onChange={(e) => handleBodyChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Type a message…"
         rows={1}

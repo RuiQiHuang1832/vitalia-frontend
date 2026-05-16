@@ -4,13 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-// POSTs to /conversations (idempotent — backend returns the existing thread
-// if one already exists for this participant pair) and navigates to
-// /messages?c=<id>. Returns a `busy` flag so callers can disable the trigger
-// while the request is in flight.
-//
-// Error handling: surfaces backend message via toast. Caller doesn't need
-// to handle exceptions — they're swallowed inside the hook.
+// POST /conversations is idempotent — returns existing thread if one exists.
 export function useStartConversation() {
   const router = useRouter()
   const [busy, setBusy] = useState(false)

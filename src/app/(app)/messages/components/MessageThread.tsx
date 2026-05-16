@@ -12,13 +12,15 @@ import { Button } from '@/components/ui/button'
 import { useMessages } from '@/hooks/useMessages'
 import { getSocket } from '@/lib/socket'
 import { cn } from '@/lib/utils'
-import { format, isSameDay, isToday } from 'date-fns'
-import { useEffect, useRef } from 'react'
+import { format, formatDistanceToNow, isSameDay, isToday } from 'date-fns'
+import { useEffect, useRef, useState } from 'react'
+
+// Sender re-emits typing:start every 2s while active; clear after 5s of
+// silence so a dropped sender doesn't leave the indicator stuck.
+const TYPING_INDICATOR_TIMEOUT_MS = 5000
 
 type Props = {
   conversation: Conversation | null
-  // Called after a successful send so the parent can refresh the
-  // conversation list (last-message preview, ordering, etc).
   onMessageSent: () => void
 }
 
@@ -39,16 +41,19 @@ function displayName(p: ConversationParticipant): string {
 export default function MessageThread({ conversation, onMessageSent }: Props) {
   const currentUserId = useAuthStore((s) => s.user?.id)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [typingUserId, setTypingUserId] = useState<number | null>(null)
 
-  // Hook returns null-key when conversation is null, so SWR doesn't fetch.
+  // Tick once a minute so "Last seen X ago" stays fresh without a refresh.
+  const [, setNowTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setNowTick((n) => n + 1), 60_000)
+    return () => clearInterval(id)
+  }, [])
+
   const { messages, hasMore, isLoading, setSize, size, mutate } = useMessages(
     conversation?.id ?? null
   )
 
-  // Auto-scroll to the latest message whenever the message count changes
-  // (new send, initial load). Only scrolls within the thread container, not
-  // the whole page. Uses a microtask delay so the DOM has the new node
-  // before we measure scrollHeight.
   useEffect(() => {
     if (!scrollRef.current) return
     const el = scrollRef.current
@@ -57,11 +62,6 @@ export default function MessageThread({ conversation, onMessageSent }: Props) {
     })
   }, [messages.length, conversation?.id])
 
-  // Live updates for THIS thread's message list. Listens for any
-  // message:new event and only acts on ones for the open conversation.
-  // Dedupes against the existing cache by id — important because the
-  // sender's own tab already inserted the message via handleSent and
-  // would otherwise see it twice.
   const conversationId = conversation?.id ?? null
   useEffect(() => {
     if (conversationId == null) return
@@ -74,9 +74,9 @@ export default function MessageThread({ conversation, onMessageSent }: Props) {
       mutate(
         (pages) => {
           if (!pages) return pages
-          // Page 0 holds the newest messages — that's where a new arrival
-          // belongs. Skip the insert if the id is already present.
           const [first, ...rest] = pages
+          // Dedupe: server broadcasts BEFORE responding to the sender's POST,
+          // so the sender's own tab can race the websocket frame.
           if (first?.data.some((m) => m.id === message.id)) {
             return pages
           }
@@ -95,6 +95,69 @@ export default function MessageThread({ conversation, onMessageSent }: Props) {
     }
   }, [conversationId, mutate])
 
+  useEffect(() => {
+    setTypingUserId(null)
+    if (conversationId == null) return
+
+    const socket = getSocket()
+    let safetyTimer: ReturnType<typeof setTimeout> | null = null
+
+    function clearSafety() {
+      if (safetyTimer) {
+        clearTimeout(safetyTimer)
+        safetyTimer = null
+      }
+    }
+
+    // Filter own userId — our other tabs are in the same room and would
+    // otherwise show us as typing to ourselves.
+    function onTypingStart(payload: { conversationId: number; userId: number }) {
+      if (payload.conversationId !== conversationId) return
+      if (payload.userId === currentUserId) return
+      setTypingUserId(payload.userId)
+      clearSafety()
+      safetyTimer = setTimeout(() => setTypingUserId(null), TYPING_INDICATOR_TIMEOUT_MS)
+    }
+
+    function onTypingStop(payload: { conversationId: number; userId: number }) {
+      if (payload.conversationId !== conversationId) return
+      if (payload.userId === currentUserId) return
+      setTypingUserId(null)
+      clearSafety()
+    }
+
+    socket.on('typing:start', onTypingStart)
+    socket.on('typing:stop', onTypingStop)
+    return () => {
+      socket.off('typing:start', onTypingStart)
+      socket.off('typing:stop', onTypingStop)
+      clearSafety()
+    }
+  }, [conversationId, currentUserId])
+
+  // Complement to the parent's select-time mark-read: a message arriving in
+  // the open thread doesn't bump unreadCount (we suppress that to avoid a
+  // flash), so we still need to advance lastReadAt server-side.
+  const lastMarkedReadIdRef = useRef<number | null>(null)
+  useEffect(() => {
+    if (conversationId == null) return
+    const latest = messages[messages.length - 1]
+    if (!latest || latest.conversationId !== conversationId) return
+    if (latest.senderId === currentUserId) return
+    if (latest.id === lastMarkedReadIdRef.current) return
+
+    lastMarkedReadIdRef.current = latest.id
+
+    const controller = new AbortController()
+    fetch(`/api/conversations/${conversationId}/read`, {
+      method: 'POST',
+      credentials: 'include',
+      signal: controller.signal,
+    }).catch(() => {})
+
+    return () => controller.abort()
+  }, [conversationId, messages, currentUserId])
+
   if (!conversation) {
     return (
       <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
@@ -105,15 +168,8 @@ export default function MessageThread({ conversation, onMessageSent }: Props) {
 
   const other = getOtherParticipant(conversation, currentUserId)
 
-  // Index of the most recent message I sent that the other side has read,
-  // or -1 if there isn't one. We only render the read-receipt under that
-  // single bubble — replaying it on every prior sent message would be noisy.
-  // Recomputed on every render; the conversation cache is mutated when the
-  // server emits message:read, which re-renders this component for free.
-  //
-  // Walks newest → oldest, skipping the other side's messages and any of
-  // mine that were sent after their lastReadAt cursor. The first sent-by-me
-  // message at-or-before the cursor wins.
+  // Index of the most recent message I sent that the other side has read.
+  // Render the receipt only under that bubble, not every prior one.
   const lastReadByOtherIdx = (() => {
     if (!other.lastReadAt) return -1
     const readAt = new Date(other.lastReadAt).getTime()
@@ -125,14 +181,6 @@ export default function MessageThread({ conversation, onMessageSent }: Props) {
     return -1
   })()
 
-  // After a successful POST, optimistically prepend the new message to
-  // page 0 of the SWR cache so it appears immediately without a refetch.
-  // We then call onMessageSent() to refresh the conversation list.
-  //
-  // Dedupes by id — the server fires the message:new broadcast BEFORE
-  // sending the HTTP response, so the websocket frame can land first
-  // and the onMessageNew listener may have already inserted this row.
-  // Without this guard we'd render the message twice.
   function handleSent(newMessage: Message) {
     mutate(
       (pages) => {
@@ -155,9 +203,18 @@ export default function MessageThread({ conversation, onMessageSent }: Props) {
     <>
       <header className="px-4 py-3 border-b shrink-0">
         <h2 className="font-semibold">{displayName(other)}</h2>
-        {other.user.provider?.specialty && (
-          <p className="text-xs text-muted-foreground">{other.user.provider.specialty}</p>
-        )}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          {other.user.provider?.specialty && (
+            <span>{other.user.provider.specialty}</span>
+          )}
+          {other.user.provider?.specialty && other.lastReadAt && <span>·</span>}
+          {other.lastReadAt && (
+            <span>
+              Last seen{' '}
+              {formatDistanceToNow(new Date(other.lastReadAt), { addSuffix: true })}
+            </span>
+          )}
+        </div>
       </header>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
@@ -177,8 +234,6 @@ export default function MessageThread({ conversation, onMessageSent }: Props) {
         {messages.map((m, i) => {
           const isMine = m.senderId === currentUserId
           const prev = messages[i - 1]
-          // Show a date divider when this message is from a different
-          // calendar day than the previous one (or it's the first message).
           const showDateDivider =
             !prev || !isSameDay(new Date(prev.createdAt), new Date(m.createdAt))
 
@@ -230,6 +285,12 @@ export default function MessageThread({ conversation, onMessageSent }: Props) {
           )
         })}
       </div>
+
+      {typingUserId !== null && typingUserId === other.userId && (
+        <div className="px-4 py-1 text-xs text-muted-foreground italic shrink-0">
+          {displayName(other)} is typing…
+        </div>
+      )}
 
       <MessageComposer conversationId={conversation.id} onSent={handleSent} />
     </>

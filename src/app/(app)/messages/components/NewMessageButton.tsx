@@ -18,15 +18,9 @@ import { toast } from 'sonner'
 import useSWR from 'swr'
 
 type Props = {
-  // Called after the sheet successfully creates (or finds) a conversation,
-  // so the parent can select it and mutate the conversations list.
   onCreated: (conversationId: number) => void
 }
 
-// Minimal recipient — just enough fields to render the row and resolve
-// the userId for the POST. userId is nullable on Patient in the schema,
-// so we filter out anyone who has no linked User account before rendering
-// (those can't be messaged).
 type Recipient = {
   userId: number
   firstName: string
@@ -43,28 +37,20 @@ type ApiPatient = {
   email: string
 }
 
-// Pull a large-ish first page so the in-memory search covers most cases.
-// If user base outgrows this, swap to a server-side ?name= filter.
 const RECIPIENT_PAGE_SIZE = 100
 
-// Provider-only: patients can't initiate conversations. Parent component
-// gates rendering on role === 'PROVIDER', so this component assumes the
-// caller is a provider and always fetches patients.
 export default function NewMessageButton({ onCreated }: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [busyUserId, setBusyUserId] = useState<number | null>(null)
 
-  // Only fetch when the sheet is open — avoids loading a list the user
-  // never asked to see. The conditional key is the SWR pattern for this.
   const swrKey = open ? `/patients?page=1&limit=${RECIPIENT_PAGE_SIZE}` : null
   const { data, isLoading } = useSWR<PaginatedResponse<ApiPatient>>(
     swrKey,
     swrFetcher
   )
 
-  // Drop anyone without a linked userId since the backend keys
-  // conversations on User, not Patient.
+  // Patients without a linked User account can't be messaged.
   const recipients = useMemo<Recipient[]>(() => {
     if (!data?.data) return []
     return data.data
@@ -77,8 +63,6 @@ export default function NewMessageButton({ onCreated }: Props) {
       }))
   }, [data])
 
-  // Client-side filter — fine for the page-100 dataset. Case-insensitive
-  // match on first/last name combined.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     if (!q) return recipients
@@ -87,10 +71,6 @@ export default function NewMessageButton({ onCreated }: Props) {
     )
   }, [recipients, search])
 
-  // POST /conversations is idempotent by participant pair — if a thread
-  // already exists with this user, the backend returns it with 200; if
-  // not, it creates one and returns 201. Either way we treat the response
-  // identically and hand the id to the parent to select.
   async function startConversation(recipient: Recipient) {
     if (busyUserId !== null) return
     setBusyUserId(recipient.userId)

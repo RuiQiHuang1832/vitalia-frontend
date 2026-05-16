@@ -12,26 +12,16 @@ import { useCallback, useEffect, useMemo } from 'react'
 
 type Props = {
   initialData: ConversationsResponse
-  // Current user's id resolved server-side from the JWT cookie. Used as a
-  // fallback for the conversation list's "other participant" derivation
-  // until the Zustand auth store finishes hydrating — prevents the
-  // wrong-name flash on first paint.
+  // Server-resolved fallback used until the Zustand auth store hydrates,
+  // otherwise the conversation list briefly shows the wrong participant.
   initialCurrentUserId: number | null
 }
 
-// Top-level client component for the /messages page. Renders the split
-// pane (conversation list + active thread) and owns:
-//   - the SWR cache for conversations (so child components share one source)
-//   - the "which conversation is selected" state, persisted in the URL as
-//     ?c=<id> so reloading the page keeps the selection (and matches the
-//     project preference of inline edits over /[id] routes)
-//   - the side effect of marking a conversation read when it's opened
 export default function MessagesClient({ initialData, initialCurrentUserId }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Selected conversation ID lives in the URL. Reading it here makes the
-  // selection survive reload, browser back/forward, and shareable links.
+  // Selected conversation lives in the URL so reload / back-forward keep it.
   const selectedIdParam = searchParams.get('c')
   const selectedId = selectedIdParam ? Number(selectedIdParam) : null
 
@@ -46,22 +36,9 @@ export default function MessagesClient({ initialData, initialCurrentUserId }: Pr
   const role = useAuthStore((s) => s.user?.role)
   const isProvider = role === 'PROVIDER'
 
-  // Connect the socket while this page is mounted. Lifecycle hook handles
-  // auth gating + connect/disconnect on unmount; we just need the socket
-  // reference to attach our listeners below.
   const { socket } = useMessageSocket()
 
-  // Live updates for the conversations list (left pane). Two events:
-  //   - message:new → update lastMessage / lastMessageAt / unreadCount
-  //   - message:read → reflect the other side reading our messages
-  // Listeners are attached once when the socket reference is stable.
-  // Listeners ALSO run for events the current user originated, so we
-  // dedupe / no-op for self-events to avoid double-counting.
   useEffect(() => {
-    //     Direct mutation approach
-    // Socket event arrives with the new message in the payload.
-    // Handler transforms the cache directly using that payload.
-    // UI re-renders.
     function onMessageNew(message: Message) {
       mutate(
         (current) => {
@@ -69,18 +46,15 @@ export default function MessagesClient({ initialData, initialCurrentUserId }: Pr
           const list = current.data
           const idx = list.findIndex((c) => c.id === message.conversationId)
 
-          // Conversation isn't in our local cache (e.g. the other party
-          // started it and we haven't refetched yet) — fall back to a full
-          // refetch by returning undefined. SWR re-fetches on undefined.
+          // New conversation we don't have cached yet — refetch.
           if (idx === -1) {
             return undefined
           }
 
           const target = list[idx]
           const isFromOther = message.senderId !== currentUserId
-          // Only bump unread when the message is from the other side AND
-          // the conversation isn't the one currently open. The mark-read
-          // effect would clear it again moments later otherwise — a UI flash.
+          // Don't bump unread for the open thread — the mark-read effect
+          // would clear it again moments later, causing a flash.
           const shouldBumpUnread = isFromOther && message.conversationId !== selectedId
 
           const updated: Conversation = {
@@ -90,8 +64,6 @@ export default function MessagesClient({ initialData, initialCurrentUserId }: Pr
             unreadCount: shouldBumpUnread ? target.unreadCount + 1 : target.unreadCount,
           }
 
-          // Remove the old entry and re-insert in correct order. Backend
-          // sorts by lastMessageAt DESC, so the just-updated row goes first.
           const rest = list.filter((_, i) => i !== idx)
           return { data: [updated, ...rest] }
         },
@@ -115,12 +87,10 @@ export default function MessagesClient({ initialData, initialCurrentUserId }: Pr
           const updatedParticipants = target.participants.map((p) =>
             p.userId === payload.userId ? { ...p, lastReadAt: payload.lastReadAt } : p
           )
-          // If the reader is us, our other tabs should clear their unread
-          // badge. (The tab that triggered the read already cleared via the
-          // POST /read response.)
           const updated: Conversation = {
             ...target,
             participants: updatedParticipants,
+            // Reader is us → clear our other tabs' unread badge.
             unreadCount: payload.userId === currentUserId ? 0 : target.unreadCount,
           }
           const next = [...list]
@@ -140,10 +110,6 @@ export default function MessagesClient({ initialData, initialCurrentUserId }: Pr
     }
   }, [socket, mutate, currentUserId, selectedId])
 
-  // Mark the conversation as read whenever the selection changes to a
-  // conversation that has unread messages. Fire-and-forget — if it fails
-  // we'll try again next time. After success we mutate() so the list
-  // re-fetches and the unread badge clears.
   useEffect(() => {
     if (!selectedConversation || selectedConversation.unreadCount === 0) return
 
@@ -156,21 +122,15 @@ export default function MessagesClient({ initialData, initialCurrentUserId }: Pr
       .then((res) => {
         if (res.ok) mutate()
       })
-      .catch(() => {
-        // Aborted on unmount — ignore.
-      })
+      .catch(() => {})
 
     return () => controller.abort()
   }, [selectedConversation, mutate])
 
-  // Select-by-id, persisted in the URL. Wrapped in useCallback so the
-  // NewMessageButton's onCreated dependency stays stable.
-  //
-  // Short-circuit when the user clicks the already-selected conversation
-  // — without this, router.replace fires a no-op navigation that Next
-  // still treats as a route event and refetches the page's RSC payload.
   const handleSelect = useCallback(
     (id: number) => {
+      // Short-circuit re-selection — router.replace would still fire a
+      // route event and refetch the page's RSC payload.
       if (id === selectedId) return
       const params = new URLSearchParams(searchParams.toString())
       params.set('c', String(id))
@@ -179,9 +139,6 @@ export default function MessagesClient({ initialData, initialCurrentUserId }: Pr
     [router, searchParams, selectedId]
   )
 
-  // After NewMessageButton creates (or finds) a conversation we want two
-  // things in order: refresh the list so the new thread shows up, then
-  // select it so the right pane jumps straight to it.
   const handleCreated = useCallback(
     (id: number) => {
       mutate()

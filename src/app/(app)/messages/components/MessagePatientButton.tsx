@@ -5,10 +5,7 @@ import { useStartConversation } from '@/hooks/useStartConversation'
 import { MessageSquare } from 'lucide-react'
 
 type Props = {
-  // The patient's *user* id (PatientBase.userId), not the patient row id.
-  // Conversations are keyed on User. When userId is null the patient has
-  // no linked account and can't be messaged — the parent should not render
-  // this component in that case.
+  // The User id, not the Patient row id. Conversations are keyed on User.
   userId: number
   label?: string
   variant?: 'default' | 'outline' | 'secondary' | 'ghost'
@@ -16,14 +13,6 @@ type Props = {
   className?: string
 }
 
-// Default size mirrors the shadcn Button default — callers pick `sm` when
-// they need to match smaller controls (e.g. the Manage dropdown on the
-// appointment details page).
-
-// Provider-only CTA used on the patient detail page and appointments page
-// to jump straight into a conversation with the patient. Re-uses the
-// idempotent POST /conversations endpoint, so clicking it twice doesn't
-// create duplicate threads.
 export default function MessagePatientButton({
   userId,
   label = 'Message Patient',
