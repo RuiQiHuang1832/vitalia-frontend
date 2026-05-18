@@ -12,6 +12,7 @@ export function useMessageSocket(): { socket: Socket; connected: boolean } {
     if (status !== 'authenticated') return
 
     const socket = getSocket()
+    let cancelled = false
 
     const onConnect = () => setConnected(true)
     const onDisconnect = () => setConnected(false)
@@ -24,9 +25,25 @@ export function useMessageSocket(): { socket: Socket; connected: boolean } {
     socket.on('disconnect', onDisconnect)
     socket.on('connect_error', onError)
 
-    if (!socket.connected) socket.connect()
+    // The accessToken cookie lives on the frontend origin (set via the
+    // /api proxy), so the backend socket — which is a different origin —
+    // can't read it from the handshake. Fetch it same-origin and pass it
+    // through socket.io's auth field instead.
+    ;(async () => {
+      try {
+        const res = await fetch('/socket-token', { credentials: 'include' })
+        if (!res.ok) throw new Error(`socket-token responded ${res.status}`)
+        const { token } = (await res.json()) as { token: string }
+        if (cancelled) return
+        socket.auth = { token }
+        if (!socket.connected) socket.connect()
+      } catch (err) {
+        console.error('Socket auth setup failed:', err)
+      }
+    })()
 
     return () => {
+      cancelled = true
       socket.off('connect', onConnect)
       socket.off('disconnect', onDisconnect)
       socket.off('connect_error', onError)

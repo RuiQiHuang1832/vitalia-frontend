@@ -10,7 +10,6 @@ const SOCKET_URL =
 export function getSocket(): Socket {
   if (!socket) {
     socket = createSocket(SOCKET_URL, {
-      withCredentials: true,
       autoConnect: false,
       transports: ['websocket', 'polling'],
     })
