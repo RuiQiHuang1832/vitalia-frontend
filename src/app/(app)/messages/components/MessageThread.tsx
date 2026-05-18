@@ -217,7 +217,7 @@ export default function MessageThread({ conversation, onMessageSent }: Props) {
         </div>
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-3 pb-10 space-y-2">
         {hasMore && (
           <div className="flex justify-center pb-2">
             <Button
@@ -287,7 +287,7 @@ export default function MessageThread({ conversation, onMessageSent }: Props) {
       </div>
 
       {typingUserId !== null && typingUserId === other.userId && (
-        <div className="px-4 py-1 text-xs text-muted-foreground italic shrink-0">
+        <div className="px-4 pt-2 pb-1 text-xs text-muted-foreground italic shrink-0">
           {displayName(other)} is typing…
         </div>
       )}
