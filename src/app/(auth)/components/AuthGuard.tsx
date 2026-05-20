@@ -17,6 +17,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   if (status === 'unauthenticated') {
     return null
   }
+ 
 
   return <>{children}</>
 }

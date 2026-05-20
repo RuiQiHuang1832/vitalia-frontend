@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Stack } from '@/components/ui/stack'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { calculateAge, formatDate, formatMrn } from '@/lib/utils'
 import { Calendar, Clock, Mail, Phone, Plus, User } from 'lucide-react'
 import { IoMdMedical } from 'react-icons/io'
@@ -50,15 +51,36 @@ export default function PatientHeader({ data: patient }: PatientHeaderProps) {
         <CardAction>
           <Stack gap={2}>
             {patient.userId != null && <MessagePatientButton userId={patient.userId} />}
-            <AddAppointmentDialog
-              patientId={patient.id}
-              trigger={
-                <Button className="hover:bg-teal-700 bg-teal-600 text-white">
-                  <Plus />
-                  New Appointment
-                </Button>
-              }
-            />
+            {patient.status === 'INACTIVE' || patient.status === 'DISCHARGED' ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>
+                    <Button
+                      disabled
+                      className="hover:bg-teal-700 bg-teal-600 text-white pointer-events-none"
+                    >
+                      <Plus />
+                      New Appointment
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {patient.status === 'INACTIVE'
+                    ? 'This patient is inactive and cannot be scheduled for an appointment.'
+                    : 'This patient has been discharged and cannot be scheduled for an appointment.'}
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <AddAppointmentDialog
+                patientId={patient.id}
+                trigger={
+                  <Button className="hover:bg-teal-700 bg-teal-600 text-white">
+                    <Plus />
+                    New Appointment
+                  </Button>
+                }
+              />
+            )}
           </Stack>
         </CardAction>
       </CardHeader>

@@ -3,14 +3,16 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 type Role = 'PATIENT' | 'PROVIDER' | 'ADMIN'
-type JwtPayload = { role: Role }
+type JwtPayload = { role: Role; exp?: number }
 
 function getRole(req: NextRequest): Role | null {
   const token = req.cookies.get('accessToken')?.value
   if (!token) return null
 
   try {
-    return jwtDecode<JwtPayload>(token).role
+    const payload = jwtDecode<JwtPayload>(token)
+    if (payload.exp && payload.exp * 1000 < Date.now()) return null
+    return payload.role
   } catch {
     return null
   }

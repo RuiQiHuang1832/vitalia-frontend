@@ -1,116 +1,56 @@
-# Vitalia Frontend – EMR & Appointment Management UI
+# Vitalia Frontend
 
-**View the backend code here →** [Backend](https://github.com/RuiQiHuang1832/vitalia-backend)
+Next.js client for **Vitalia**, an EMR & appointment management platform with role-based views for patients, providers, and admins.
 
-Vitalia Frontend is a clean, modern **Next.js** application that provides the user interface for the Vitalia health management platform.
-It offers role-based views for **patients**, **providers**, and **admins**, and connects directly to the Vitalia Backend EMR & Appointment System API.
+**Backend repo →** [vitalia-backend](https://github.com/RuiQiHuang1832/vitalia-backend)
 
-The goal is a simple, professional, and functional UI, not flashy, designed to clearly demonstrate real healthcare workflows and solid full-stack integration.
+## Screenshots
+
+### Provider — Dashboard
+
+![Provider dashboard](https://github.com/user-attachments/assets/06738611-a605-41da-a928-b084d9c43e6f)
+
+### Provider — Appointments
+
+![Provider appointments](https://github.com/user-attachments/assets/39045e88-3ab7-4b88-b60b-a0d98172cead)
+
+### Provider — Messaging
+
+![Provider messaging](https://github.com/user-attachments/assets/aa1e2e96-f1e4-4616-9a42-50006db1a9ff)
+
+### Patient — Portal
+
+![Patient portal](https://github.com/user-attachments/assets/36883f93-4266-4234-8e67-461144ac4040)
 
 ## Features
 
-Vitalia includes three role-based interfaces, each tailored to realistic clinical workflows.
-
-## Patient Portal
-
-A streamlined view for patients to manage their information and access their medical records.
-
-### **Features**
-
-- **Login / Authentication**
-- **View Profile Information**
-- **Update Profile Details**
-- **View Upcoming Appointments**
-- **See EMR Summary**
-  - Visit notes
-  - Vitals
-  - Medications
-  - Allergies
-
-Designed to mimic typical patient-facing portals in modern health systems.
-
-## Provider Dashboard
-
-A professional interface for clinicians to manage patients, document visits, and coordinate care.
-
-### **Features**
-
-- **Provider Login**
-- **Patient List** (sortable & searchable)
-- **Patient Detail Page**
-  - Add or update EMR entries:
-    - Visit notes
-    - Vitals
-    - Medications
-    - Allergies
-- **Appointment Management**
-  - View schedule
-  - Create, update, cancel appointments
-
-This view demonstrates core EMR workflows from the clinician’s perspective.
-
-## Admin Console
-
-Lightweight admin tools for managing the platform.
-
-### **Features**
-
-- **Admin Login**
-- **Create Providers**
-- **Manage All Users**
-- Basic system overview (optional)
-
-This role showcases role-based UI gating and administrative flows.
+- **Authentication** — JWT in HttpOnly cookies, role-gated routes via middleware
+- **Provider** — patient list, EMR editor (notes, vitals, medications, allergies), appointment scheduling, provider management
+- **Patient** — profile, upcoming appointments, EMR summary
+- **Admin** — user and provider management
+- **Messaging** — real-time provider ↔ patient chat with typing indicators, read receipts, and search (socket.io)
 
 ## Tech Stack
 
-- **Next.js (App Router)**
-- **React**
-- **TypeScript**
-- **Tailwind CSS**
-- **shadcn/ui**
+Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui · Zustand · SWR · React Hook Form + Zod · socket.io-client · Vitest · Playwright
 
-## Backend Integration
+## Getting Started
 
-This frontend communicates directly with the Vitalia Backend:
+```bash
+npm install
+npm run dev
+```
 
-### Uses:
+The dev server runs at `http://localhost:3000` and proxies `/api/*` to the backend at `http://localhost:8080`. Start the [backend](https://github.com/RuiQiHuang1832/vitalia-backend) first.
 
-- `POST /auth/login`
-- `GET /patients/:id`
-- `GET /providers/:id`
-- `GET /appointments`
-- `POST /notes`, `POST /vitals`, etc.
+## Scripts
 
-The UI is intentionally minimal.
-
-## Test Accounts
-
-To quickly test the app without creating users, you can log in with the following accounts:
-
-- **Admin**: `admin@gmail.com` / `admin123`
-- **Provider**: `provider@gmail.com` / `admin123`
-- **Patient**: `patient@gmail.com` / `admin123`
-
-## Status
-
-Actively under development.
-Pages will be built gradually as backend endpoints are completed.
-
-Current focus:
-
-- Authentication flow
-- Role-based routing
-- Patient dashboard
-- Provider patient list
-
-## Goal
-
-Deliver a **clean, functional, realistic** frontend that demonstrates:
-
-- Full-stack integration
-- Role-based UI logic
-- Real EMR data workflows
-- Clean architecture and production-ready patterns
-
-This frontend doesn’t aim for animations or perfect UI polish. The focus is clarity, correctness, and professional engineering decisions.
+| Command            | Description                       |
+| ------------------ | --------------------------------- |
+| `npm run dev`      | Dev server (Turbopack)            |
+| `npm run build`    | Production build                  |
+| `npm run start`    | Run production server             |
+| `npm run lint`     | ESLint                            |
+| `npm run test`     | Vitest (watch)                    |
+| `npm run test:run` | Vitest (single run)               |
+| `npx playwright test` | Playwright E2E                 |

@@ -14,7 +14,6 @@ import { Input } from '@/components/ui/input'
 import { clearSWRCache } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -165,12 +164,6 @@ export default function LoginForm() {
                     autoComplete="off"
                     type="password"
                   />
-                  <Link
-                    href="#"
-                    className="text-muted-foreground text-sm leading-normal font-normal hover:underline"
-                  >
-                    Forgot your password?
-                  </Link>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}

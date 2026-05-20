@@ -10,6 +10,25 @@ export async function clearSWRCache() {
   await mutate(() => true, undefined, { revalidate: false })
 }
 
+// In-flight de-dupe: many SWR hooks can 401 in parallel after the 15m
+// access token expires. They should all share a single /auth/refresh call.
+let refreshPromise: Promise<boolean> | null = null
+
+export function refreshAccessToken(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = fetch('/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'include',
+    })
+      .then((res) => res.ok)
+      .catch(() => false)
+      .finally(() => {
+        refreshPromise = null
+      })
+  }
+  return refreshPromise
+}
+
 export async function hydrateAuth() {
   const justLoggedIn = sessionStorage.getItem('justLoggedIn')
 
@@ -19,9 +38,15 @@ export async function hydrateAuth() {
     return
   }
   try {
-    const res = await fetch('/api/auth/me', {
+    let res = await fetch('/api/auth/me', {
       credentials: 'include',
     })
+    if (res.status === 401) {
+      const refreshed = await refreshAccessToken()
+      if (refreshed) {
+        res = await fetch('/api/auth/me', { credentials: 'include' })
+      }
+    }
     if (!res.ok) {
       throw new Error(res.statusText)
     }

@@ -1,6 +1,14 @@
+import { refreshAccessToken } from './auth'
 
 export const swrFetcher = async (url: string) => {
-  const res = await fetch(`/api${url}`, { credentials: 'include' })
+  let res = await fetch(`/api${url}`, { credentials: 'include' })
+
+  if (res.status === 401) {
+    const refreshed = await refreshAccessToken()
+    if (refreshed) {
+      res = await fetch(`/api${url}`, { credentials: 'include' })
+    }
+  }
 
   const data = await res.json()
 
