@@ -72,6 +72,9 @@ export async function logout() {
     credentials: 'include',
   })
 
-  useAuthStore.getState().clearUser()
-  await clearSWRCache()
+  // Hard reload to guarantee a clean tab — wipes SWR cache, Zustand state,
+  // and the Next.js App Router RSC cache in one shot. Without the reload,
+  // a different user logging in on the same tab could briefly see the
+  // previous user's data (e.g. the messages list) from the router cache.
+  window.location.assign('/login')
 }
