@@ -1,4 +1,5 @@
 import { Toaster } from '@/components/ui/sonner'
+import { Analytics } from '@vercel/analytics/next'
 import { GeistSans } from 'geist/font/sans'
 import type { Metadata } from 'next'
 import './globals.css'
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body className="antialiased ">
         {children}
         <Toaster richColors position="bottom-left" />
+        <Analytics />
       </body>
     </html>
   )
